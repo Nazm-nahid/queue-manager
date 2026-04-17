@@ -15,9 +15,9 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const fuelOptions = computed(() => [
-  { key: 'diesel', label: t('fuelTypes.diesel'), description: t('fuelTypes.dieselDesc') },
-  { key: 'petrol', label: t('fuelTypes.petrol'), description: t('fuelTypes.petrolDesc') },
-  { key: 'octane', label: t('fuelTypes.octane'), description: t('fuelTypes.octaneDesc') },
+  { key: 'diesel', label: t('fuelTypes.diesel') },
+  { key: 'petrol', label: t('fuelTypes.petrol') },
+  { key: 'octane', label: t('fuelTypes.octane') },
 ]);
 </script>
 
@@ -31,9 +31,6 @@ const fuelOptions = computed(() => [
             <h2>{{ t('fuelPicker.title') }}</h2>
             <p class="tiny">{{ t('fuelPicker.subtitle', { pump: pumpName }) }}</p>
           </div>
-          <button type="button" class="scanner-close" @click="emit('close')">
-            {{ t('qrScanner.close') }}
-          </button>
         </div>
 
         <div class="fuel-grid">
@@ -44,9 +41,7 @@ const fuelOptions = computed(() => [
             class="fuel-card"
             @click="emit('select', fuel.key)"
           >
-            <span class="fuel-badge">{{ fuel.label }}</span>
-            <strong>{{ t('fuelPicker.choose') }}</strong>
-            <small>{{ fuel.description }}</small>
+            <strong>{{ fuel.label }}</strong>
           </button>
         </div>
 
@@ -117,35 +112,18 @@ const fuelOptions = computed(() => [
 }
 
 .fuel-card {
-  text-align: left;
+  text-align: center;
   border: 1px solid var(--stroke);
   background: #ffffff;
   border-radius: 18px;
-  padding: 1rem;
+  padding: 1rem 1.1rem;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(13, 41, 29, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
 }
 
 .fuel-card strong {
   color: var(--ink);
-  font-size: 1rem;
-}
-
-.fuel-card small {
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.fuel-badge {
-  align-self: flex-start;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  background: #e8f5ec;
-  color: var(--brand);
-  font-size: 0.8rem;
+  font-size: 1.03rem;
   font-weight: 700;
 }
 </style>

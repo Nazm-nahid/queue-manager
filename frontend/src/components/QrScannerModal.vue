@@ -105,9 +105,6 @@ onBeforeUnmount(stopScanner);
             <h2>{{ title }}</h2>
             <p class="tiny">{{ hint || t('qrScanner.hint') }}</p>
           </div>
-          <button type="button" class="scanner-close" @click="emit('close')">
-            {{ t('qrScanner.close') }}
-          </button>
         </div>
 
         <div class="scanner-stage">
