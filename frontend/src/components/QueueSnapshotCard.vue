@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from '../i18n';
+import QrScannerModal from './QrScannerModal.vue';
 
 const props = defineProps<{
   bookings: Array<{
     id: string;
+    pumpId: string;
     serial: number;
     runningSerial: number;
     remainingSlots: number;
@@ -14,28 +17,13 @@ const props = defineProps<{
   }>;
 }>();
 
-const activeTab = ref(0);
+const scannerBooking = ref<(typeof props.bookings)[number] | null>(null);
 const { t } = useI18n();
+const router = useRouter();
 
-watch(
-  () => props.bookings,
-  () => {
-    if (activeTab.value >= props.bookings.length) {
-      activeTab.value = 0;
-    }
-  },
-  { deep: true },
-);
-
-const currentBooking = computed(() => props.bookings[activeTab.value]);
-
-const serialGap = computed(() => {
-  if (!currentBooking.value) {
-    return 0;
-  }
-
-  return Math.max(currentBooking.value.serial - currentBooking.value.runningSerial, 0);
-});
+function queueAhead(serial: number, runningSerial: number) {
+  return Math.max(serial - runningSerial, 0);
+}
 
 function fuelLabel(fuelType?: string | null) {
   if (!fuelType) {
@@ -48,42 +36,62 @@ function fuelLabel(fuelType?: string | null) {
 
   return fuelType;
 }
+
+function openScanner(booking: (typeof props.bookings)[number]) {
+  scannerBooking.value = booking;
+}
+
+function closeScanner() {
+  scannerBooking.value = null;
+}
+
+function handleQrScan(scannedValue: string) {
+  if (!scannerBooking.value) {
+    return;
+  }
+
+  void router.push({
+    path: `/checkin/${scannerBooking.value.pumpId}`,
+    query: { token: scannedValue },
+  });
+  scannerBooking.value = null;
+}
 </script>
 
 <template>
   <section class="snapshot-card">
     <h2>{{ t('snapshot.title') }}</h2>
 
-    <div class="snapshot-tabs" role="tablist" :aria-label="t('snapshot.title')">
-      <button
-        v-for="(booking, index) in bookings"
-        :key="booking.id"
-        type="button"
-        class="snapshot-tab"
-        :class="{ active: index === activeTab }"
-        role="tab"
-        :aria-selected="index === activeTab"
-        @click="activeTab = index"
-      >
-        {{ fuelLabel(booking.fuelType) }} - {{ booking.pumpName }}
-      </button>
+    <div class="snapshot-list">
+      <article v-for="booking in bookings" :key="booking.id" class="snapshot-item">
+        <h3 class="snapshot-item-title">{{ fuelLabel(booking.fuelType) }} - {{ booking.pumpName }}</h3>
+        <div class="snapshot-grid">
+          <p><span>{{ t('snapshot.yourSerial') }}</span><strong>#{{ booking.serial }}</strong></p>
+          <p><span>{{ t('snapshot.runningNow') }}</span><strong>#{{ booking.runningSerial }}</strong></p>
+          <p><span>{{ t('snapshot.queueAhead') }}</span><strong>{{ queueAhead(booking.serial, booking.runningSerial) }}</strong></p>
+          <p><span>{{ t('snapshot.slotsLeftToday') }}</span><strong>{{ booking.remainingSlots }}</strong></p>
+          <p>
+            <span>{{ t('snapshot.estimatedWait') }}</span>
+            <strong>{{ t('snapshot.minutes', { minutes: booking.etaMinutes }) }}</strong>
+          </p>
+        </div>
+        <div class="snapshot-item-footer">
+          <p class="tiny snapshot-fuel">
+            {{ t('snapshot.selectedFuel') }}: {{ fuelLabel(booking.fuelType) }}
+          </p>
+          <button type="button" class="ghost-button" @click="openScanner(booking)">
+            {{ t('pumpDetail.openCheckin') }}
+          </button>
+        </div>
+      </article>
     </div>
 
-    <template v-if="currentBooking">
-    <div class="snapshot-grid">
-      <p><span>{{ t('snapshot.yourSerial') }}</span><strong>#{{ currentBooking.serial }}</strong></p>
-      <p><span>{{ t('snapshot.runningNow') }}</span><strong>#{{ currentBooking.runningSerial }}</strong></p>
-      <p><span>{{ t('snapshot.queueAhead') }}</span><strong>{{ serialGap }}</strong></p>
-      <p><span>{{ t('snapshot.slotsLeftToday') }}</span><strong>{{ currentBooking.remainingSlots }}</strong></p>
-      <p>
-        <span>{{ t('snapshot.estimatedWait') }}</span>
-        <strong>{{ t('snapshot.minutes', { minutes: currentBooking.etaMinutes }) }}</strong>
-      </p>
-    </div>
-
-    <p class="tiny snapshot-fuel">
-      {{ t('snapshot.selectedFuel') }}: {{ fuelLabel(currentBooking.fuelType) }}
-    </p>
-    </template>
+    <QrScannerModal
+      :open="scannerBooking !== null"
+      :title="t('qrScanner.title')"
+      :hint="t('qrScanner.subtitle')"
+      @close="closeScanner"
+      @scan="handleQrScan"
+    />
   </section>
 </template>

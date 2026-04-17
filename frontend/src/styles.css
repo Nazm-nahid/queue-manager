@@ -294,31 +294,34 @@ button.solid-button {
   gap: 0.6rem;
 }
 
-.snapshot-tabs {
+.snapshot-list {
   margin-top: 0.7rem;
   display: flex;
-  gap: 0.45rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
+  flex-direction: column;
+  gap: 0.7rem;
 }
 
-.snapshot-tab {
+.snapshot-item {
   border: 1px solid var(--stroke);
-  background: #f2f7f1;
-  color: var(--ink);
-  border-radius: 999px;
-  padding: 0.48rem 0.8rem;
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fbfdf9;
 }
 
-.snapshot-tab.active {
-  background: var(--brand);
-  color: #f4fff9;
-  border-color: var(--brand);
+.snapshot-item-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+
+.snapshot-item-footer {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .snapshot-grid p {

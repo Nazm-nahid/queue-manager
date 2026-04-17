@@ -8,6 +8,7 @@ import { useI18n } from '../i18n';
 
 type SerialBooking = {
   id: string;
+  pumpId: string;
   serial: number;
   fuelType: string;
   pumpName: string;
@@ -47,6 +48,7 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
   const gap = Math.max(payload.serial - pump.runningSerial, 0);
   const newBooking: SerialBooking = {
     id: `${payload.pumpId}-${payload.fuelType}-${payload.serial}-${Date.now()}`,
+    pumpId: payload.pumpId,
     serial: payload.serial,
     fuelType: payload.fuelType,
     pumpName: pump.name,
