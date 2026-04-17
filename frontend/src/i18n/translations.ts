@@ -19,6 +19,9 @@ export const translations = {
     'home.tabs.search': 'সিরিয়াল নিবো',
     'home.emptyQueueTitle': 'এখনও কোনও সিরিয়াল নেওয়া হয়নি',
     'home.emptyQueueLead': 'সার্চ ও পাম্প লিস্ট ট্যাবে গিয়ে সিরিয়াল নিন।',
+    'home.loadingPumps': 'পাম্প লিস্ট লোড হচ্ছে...',
+    'home.loadFailed': 'পাম্প লিস্ট লোড করা যাচ্ছে না।',
+    'home.retryLoad': 'আবার চেষ্টা করুন',
 
     'search.label': 'নাম, ঠিকানা বা ম্যাপ লিংক দিয়ে পাম্প খুঁজুন',
     'search.placeholder': 'উদাহরণ: ধানমন্ডি, মিরপুর, maps',
@@ -83,6 +86,15 @@ export const translations = {
     'checkin.invalidTitle': 'অকার্যকর QR',
     'checkin.invalidLead': 'এই QR কোডের সাথে কোনও রেজিস্টার্ড পাম্প মেলেনি।',
 
+    'toast.takeSerialSuccess': '{pump} এর জন্য {fuel} সিরিয়াল #{serial} নেওয়া হয়েছে।',
+    'toast.takeSerialFailed': 'সিরিয়াল নেওয়া যায়নি। আবার চেষ্টা করুন।',
+    'toast.qrScanSuccess': 'QR স্ক্যান সফল। চেক-ইন স্ক্রিন খুলছে।',
+    'toast.qrScanFailed': 'QR স্ক্যান ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
+    'toast.listLoadFailed': 'পাম্প লিস্ট লোড করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।',
+    'toast.listLoadSuccess': 'পাম্প লিস্ট সফলভাবে লোড হয়েছে।',
+    'toast.offline': 'ইন্টারনেট সংযোগ নেই।',
+    'toast.online': 'ইন্টারনেট সংযোগ ফিরে এসেছে।',
+
     'common.backToSearch': 'সার্চে ফিরে যান',
     'common.backToHome': 'হোমে ফিরে যান',
     'people': 'জন',
@@ -109,6 +121,9 @@ export const translations = {
     'home.tabs.search': 'Take Serial',
     'home.emptyQueueTitle': 'No serial booked yet',
     'home.emptyQueueLead': 'Go to the Search & Pump List tab to take a serial.',
+    'home.loadingPumps': 'Loading pump list...',
+    'home.loadFailed': 'Unable to load pump list.',
+    'home.retryLoad': 'Try Again',
 
     'search.label': 'Search pump by name, address, or maps link',
     'search.placeholder': 'Try: Dhanmondi, Mirpur, maps',
@@ -172,6 +187,15 @@ export const translations = {
     'checkin.success': 'Your status is now active. Proceed to the service lane when your serial is called.',
     'checkin.invalidTitle': 'Invalid QR',
     'checkin.invalidLead': 'We could not match this QR code to any registered pump.',
+
+    'toast.takeSerialSuccess': 'Serial #{serial} for {fuel} at {pump} booked successfully.',
+    'toast.takeSerialFailed': 'Could not take serial. Please try again.',
+    'toast.qrScanSuccess': 'QR scan successful. Opening check-in screen.',
+    'toast.qrScanFailed': 'QR scan failed. Please try again.',
+    'toast.listLoadFailed': 'Could not load pump list. Check your internet connection.',
+    'toast.listLoadSuccess': 'Pump list loaded successfully.',
+    'toast.offline': 'No internet connection.',
+    'toast.online': 'Internet connection restored.',
 
     'common.backToSearch': 'Back to Search',
     'common.backToHome': 'Back to Home',

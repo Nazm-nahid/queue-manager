@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 
 const props = defineProps<{
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const toast = useToast();
 const videoEl = ref<HTMLVideoElement | null>(null);
 const status = ref<'idle' | 'starting' | 'scanning' | 'error'>('idle');
 const errorMessage = ref('');
@@ -22,6 +24,7 @@ const errorMessage = ref('');
 let reader: BrowserMultiFormatReader | null = null;
 let controls: { stop: () => void } | null = null;
 let hasScanned = false;
+let hasShownCameraErrorToast = false;
 
 function stopScanner() {
   try {
@@ -32,6 +35,7 @@ function stopScanner() {
   controls = null;
   reader = null;
   hasScanned = false;
+  hasShownCameraErrorToast = false;
   status.value = 'idle';
 }
 
@@ -69,6 +73,10 @@ async function startScanner() {
         if (error && error.name !== 'NotFoundException') {
           errorMessage.value = error.message || t('qrScanner.cameraUnavailable');
           status.value = 'error';
+          if (!hasShownCameraErrorToast) {
+            toast.error(t('toast.qrScanFailed'));
+            hasShownCameraErrorToast = true;
+          }
         }
       },
     );
@@ -77,6 +85,10 @@ async function startScanner() {
   } catch (error) {
     status.value = 'error';
     errorMessage.value = error instanceof Error ? error.message : t('qrScanner.cameraUnavailable');
+    if (!hasShownCameraErrorToast) {
+      toast.error(t('toast.qrScanFailed'));
+      hasShownCameraErrorToast = true;
+    }
   }
 }
 

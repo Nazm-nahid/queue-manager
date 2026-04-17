@@ -3,6 +3,7 @@ import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { setLocale, useI18n } from './i18n';
 import type { TranslationKey } from './i18n/translations';
+import ToastStack from './components/ToastStack.vue';
 
 const route = useRoute();
 const { locale, t } = useI18n();
@@ -51,5 +52,7 @@ watch(
     <main class="app-content">
       <router-view />
     </main>
+
+    <ToastStack />
   </div>
 </template>

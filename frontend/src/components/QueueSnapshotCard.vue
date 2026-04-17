@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 import QrScannerModal from './QrScannerModal.vue';
 
@@ -19,6 +20,7 @@ const props = defineProps<{
 
 const scannerBooking = ref<(typeof props.bookings)[number] | null>(null);
 const { t } = useI18n();
+const toast = useToast();
 const router = useRouter();
 
 function queueAhead(serial: number, runningSerial: number) {
@@ -45,16 +47,28 @@ function closeScanner() {
   scannerBooking.value = null;
 }
 
-function handleQrScan(scannedValue: string) {
+async function handleQrScan(scannedValue: string) {
   if (!scannerBooking.value) {
+    toast.error(t('toast.qrScanFailed'));
     return;
   }
 
-  void router.push({
-    path: `/checkin/${scannerBooking.value.pumpId}`,
-    query: { token: scannedValue },
-  });
-  scannerBooking.value = null;
+  if (!scannedValue.trim()) {
+    toast.error(t('toast.qrScanFailed'));
+    return;
+  }
+
+  try {
+    await router.push({
+      path: `/checkin/${scannerBooking.value.pumpId}`,
+      query: { token: scannedValue },
+    });
+    toast.success(t('toast.qrScanSuccess'));
+  } catch {
+    toast.error(t('toast.qrScanFailed'));
+  } finally {
+    scannerBooking.value = null;
+  }
 }
 </script>
 
