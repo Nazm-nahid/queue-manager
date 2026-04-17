@@ -13,6 +13,7 @@ type SerialBooking = {
   serial: number;
   fuelType: FuelType;
   pumpName: string;
+  pumpLocation: string;
   runningSerial: number;
   remainingSlots: number;
   etaMinutes: number;
@@ -124,6 +125,7 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
     serial: payload.serial,
     fuelType: payload.fuelType,
     pumpName: pump.name,
+    pumpLocation: pump.address,
     runningSerial: fuelQueue.runningSerial,
     remainingSlots: fuelQueue.dailySerialLimit - fuelQueue.nextSerial,
     etaMinutes: gap * fuelQueue.serviceMinutesPerVehicle,

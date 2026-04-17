@@ -15,6 +15,7 @@ const props = defineProps<{
     etaMinutes: number;
     fuelType: string;
     pumpName: string;
+    pumpLocation: string;
   }>;
 }>();
 
@@ -135,23 +136,47 @@ async function handleQrScan(scannedValue: string) {
     <div class="snapshot-list">
       <article v-for="booking in bookings" :key="booking.id" class="snapshot-simple-item">
         <div class="snapshot-simple-head">
-          <h3 class="snapshot-item-title">{{ fuelLabel(booking.fuelType) }} - {{ booking.pumpName }}</h3>
-          <p class="snapshot-simple-wait-label">{{ t('snapshot.estimatedWait') }}</p>
-          <p class="snapshot-simple-wait-time">{{ formatCountdown(etaCountdownSeconds[booking.id] ?? 0) }}</p>
+          <h3 class="snapshot-item-title">{{ booking.pumpName }}</h3>
+          <h4 class="snapshot-item-subtitle">
+            <svg
+              class="location-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 22C12 22 19 15.2 19 10A7 7 0 1 0 5 10C5 15.2 12 22 12 22Z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.8" />
+            </svg>
+            {{ booking.pumpLocation }}
+          </h4>
+        </div>
+        <div class="snapshot-simple-stats">
+          <div>
+            <p class="snapshot-simple-wait-label">{{ t('snapshot.estimatedWait') }}</p>
+            <p class="snapshot-simple-wait-time">{{ formatCountdown(etaCountdownSeconds[booking.id] ?? 0) }} {{ t('snapshot.minutes') }}</p>
+          </div>
+          <div>
+            <p class="tiny snapshot-simple-fuel">
+            {{ fuelLabel(booking.fuelType) }}
+          </p>
+          </div>
+
         </div>
 
         <div class="snapshot-simple-stats">
           <p><span>{{ t('snapshot.yourSerial') }}</span><strong>#{{ booking.serial }}</strong></p>
           <p><span>{{ t('snapshot.runningNow') }}</span><strong>#{{ booking.runningSerial }}</strong></p>
-          <p><span>{{ t('snapshot.queueAhead') }}</span><strong>{{ queueAhead(booking.serial, booking.runningSerial) }}</strong></p>
-          <p><span>{{ t('snapshot.slotsLeftToday') }}</span><strong>{{ booking.remainingSlots }}</strong></p>
         </div>
 
         <div class="snapshot-item-footer">
-          <p class="tiny snapshot-simple-fuel">
-            {{ t('snapshot.selectedFuel') }}: {{ fuelLabel(booking.fuelType) }}
-          </p>
-          <button type="button" class="ghost-button" @click="openScanner(booking)">
+          <button type="button" class="solid-button w-full" @click="openScanner(booking)">
             {{ t('pumpDetail.openCheckin') }}
           </button>
         </div>
@@ -180,6 +205,25 @@ async function handleQrScan(scannedValue: string) {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  background-color: var(--brand-background);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.snapshot-item-subtitle {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.location-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
 }
 
 .snapshot-simple-wait-label {
@@ -216,11 +260,11 @@ async function handleQrScan(scannedValue: string) {
 }
 
 .snapshot-simple-fuel {
-  margin-top: 0;
-  padding: 0.45rem 0.65rem;
-  border-radius: 10px;
-  background: #eef8f2;
-  color: var(--brand);
-  border: 1px solid rgba(9, 87, 63, 0.12);
+  color: var(--accent);
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
 }
 </style>

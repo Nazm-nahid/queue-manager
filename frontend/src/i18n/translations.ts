@@ -40,7 +40,7 @@ export const translations = {
     'snapshot.queueAhead': 'আপনার আগের মোট সিরিয়াল সংখ্যা',
     'snapshot.slotsLeftToday': 'আজকের বাকি স্লট',
     'snapshot.estimatedWait': 'আরো অপেক্ষা করতে হবে',
-    'snapshot.minutes': '{minutes} মিনিট',
+    'snapshot.minutes': 'মিনিট',
     'snapshot.selectedFuel': 'নির্বাচিত জ্বালানি',
 
     'pumpDetail.kicker': 'petrol pump serial',
@@ -142,7 +142,7 @@ export const translations = {
     'snapshot.queueAhead': 'Queue ahead',
     'snapshot.slotsLeftToday': 'Slots left today',
     'snapshot.estimatedWait': 'Estimated wait',
-    'snapshot.minutes': '{minutes} min',
+    'snapshot.minutes': 'minute',
     'snapshot.selectedFuel': 'Selected fuel',
 
     'pumpDetail.kicker': 'petrol pump serial',

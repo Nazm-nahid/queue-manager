@@ -6,6 +6,7 @@
   --ink: #112019;
   --muted: #4e6156;
   --brand: #09573f;
+  --brand-background: #159e75a9;
   --accent: #ff9100;
   --stroke: #d9e0d5;
   --radius: 16px;
@@ -324,7 +325,7 @@ button.solid-button {
 }
 
 .snapshot-item-title {
-  font-size: 0.92rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin: 0;
   color: var(--ink);
