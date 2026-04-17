@@ -48,8 +48,19 @@ a {
 }
 
 .brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.35rem;
   font-weight: 700;
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(9, 87, 63, 0.18);
 }
 
 .lang-switch {

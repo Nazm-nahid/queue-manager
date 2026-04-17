@@ -22,7 +22,10 @@ watch(
   <div class="app-shell">
     <header class="app-header">
       <div class="header-top">
-        <router-link to="/" class="brand-link">{{t('app.brandName')}}</router-link>
+        <router-link to="/" class="brand-link">
+          <img src="/logo.png" alt="Serial Koto" class="brand-logo" />
+          <span>{{ t('app.brandName') }}</span>
+        </router-link>
         <div class="lang-switch" role="group" aria-label="language switch">
           <button
             type="button"
