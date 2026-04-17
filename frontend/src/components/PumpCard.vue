@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Pump } from '../data/mockPumps';
+import { computed, ref } from 'vue';
+import type { FuelType, Pump } from '../data/mockPumps';
 import { useI18n } from '../i18n';
 import FuelTypeModal from './FuelTypeModal.vue';
 
@@ -10,20 +10,37 @@ const emit = defineEmits<{
 }>();
 const { t } = useI18n();
 const isFuelPickerOpen = ref(false);
-const selectedFuelType = ref<string | null>(null);
+const selectedFuelType = ref<FuelType | null>(null);
 const issuedSerial = ref<number | null>(null);
+const activeFuelTab = ref<FuelType>('petrol');
+
+const fuelTabs = computed(() => [
+  { key: 'petrol' as const, label: t('fuelTypes.petrol'), description: t('fuelTypes.petrolDesc') },
+  { key: 'diesel' as const, label: t('fuelTypes.diesel'), description: t('fuelTypes.dieselDesc') },
+  { key: 'octane' as const, label: t('fuelTypes.octane'), description: t('fuelTypes.octaneDesc') },
+]);
+
+const activeFuelInfo = computed(() => fuelTabs.value.find((fuel) => fuel.key === activeFuelTab.value));
+const activeFuelQueue = computed(() => props.pump.fuelQueues[activeFuelTab.value]);
 
 function handleSerial() {
   isFuelPickerOpen.value = true;
 }
 
-function fuelLabel(fuelType: string) {
-  return t(`fuelTypes.${fuelType as 'diesel' | 'petrol' | 'octane'}`);
+function fuelLabel(fuelType: FuelType) {
+  return t(`fuelTypes.${fuelType}`);
+}
+
+function isFuelType(value: string): value is FuelType {
+  return value === 'diesel' || value === 'petrol' || value === 'octane';
 }
 
 function handleFuelSelect(fuelType: string) {
+  if (!isFuelType(fuelType)) return;
+
   selectedFuelType.value = fuelType;
-  issuedSerial.value = props.pump.nextSerial;
+  activeFuelTab.value = fuelType;
+  issuedSerial.value = props.pump.fuelQueues[fuelType].nextSerial;
   isFuelPickerOpen.value = false;
 
   emit('take-serial', {
@@ -39,13 +56,29 @@ function handleFuelSelect(fuelType: string) {
     <div class="pump-body">
       <h3 class="pump-title">{{ pump.name }}</h3>
       <p class="pump-text">{{ pump.address }}</p>
+      <div class="fuel-tabs" role="tablist" :aria-label="t('fuelPicker.title')">
+        <button
+          v-for="fuel in fuelTabs"
+          :key="fuel.key"
+          type="button"
+          class="fuel-tab"
+          :class="{ active: activeFuelTab === fuel.key }"
+          role="tab"
+          :aria-selected="activeFuelTab === fuel.key"
+          @click="activeFuelTab = fuel.key"
+        >
+          {{ fuel.label }}
+        </button>
+      </div>
       <p class="pump-text">
-        {{ t('pump.running') }}: {{ pump.runningSerial }} {{ t('number') }}
+        {{ t('pump.running') }}: {{ activeFuelQueue.runningSerial }} {{ t('number') }}
       </p>
       <p class="pump-text">
-        {{ t('pump.next') }} {{ pump.nextSerial }} {{ t('people') }}
+        {{ t('pump.next') }} {{ activeFuelQueue.nextSerial }} {{ t('people') }}
       </p>
-      <p class="pump-text">{{ t('pump.slotsLeft') }}: {{ pump.dailySerialLimit - pump.nextSerial }} {{ t('ti') }}</p>
+      <p class="pump-text">
+        {{ t('pump.slotsLeft') }}: {{ activeFuelQueue.dailySerialLimit - activeFuelQueue.nextSerial }} {{ t('ti') }}
+      </p>
 
       <div v-if="selectedFuelType && issuedSerial !== null" class="serial-status-card serial-chip-row">
         <div class="status-item">
@@ -74,3 +107,39 @@ function handleFuelSelect(fuelType: string) {
     />
   </article>
 </template>
+
+<style scoped>
+.fuel-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.fuel-tab {
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  padding: 0.5rem 0.4rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: #f5faf3;
+  cursor: pointer;
+}
+
+.fuel-tab.active {
+  color: #f4fff9;
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.fuel-tab-info {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  min-height: 2.5rem;
+}
+</style>

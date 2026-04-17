@@ -6,9 +6,11 @@
   --ink: #112019;
   --muted: #4e6156;
   --brand: #09573f;
-  --accent: #ff9f1c;
+  --accent: #ff9100;
   --stroke: #d9e0d5;
   --radius: 16px;
+  --sticky-gap: 0.45rem;
+  --header-sticky-offset: calc(34px + 0.7rem);
 }
 
 * {
@@ -37,7 +39,13 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 0.65rem 0 var(--sticky-gap);
+  background: linear-gradient(180deg, rgba(246, 248, 243, 0.98), rgba(246, 248, 243, 0.88));
+  backdrop-filter: blur(8px);
 }
 
 .header-top {
@@ -111,7 +119,7 @@ a {
 
 .kicker {
   margin: 0 0 0.55rem;
-  color: #ffe8bf;
+  color: var(--accent);
   font-size: 0.8rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -148,7 +156,14 @@ h2 {
 .home-tabs {
   display: flex;
   gap: 0.55rem;
-  margin-top: 0.2rem;
+  margin-top: 0;
+  padding: 1.5rem 0;
+  position: sticky;
+  top: calc(var(--header-sticky-offset) + var(--sticky-gap));
+  z-index: 20;
+  /* padding: 0.45rem 0; */
+  background: linear-gradient(180deg, rgba(246, 248, 243, 0.98), rgba(246, 248, 243, 0.88));
+  backdrop-filter: blur(6px);
 }
 
 .home-tab {

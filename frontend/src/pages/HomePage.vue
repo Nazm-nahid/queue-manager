@@ -3,14 +3,14 @@ import { computed, ref } from 'vue';
 import PumpCard from '../components/PumpCard.vue';
 import PumpSearchBar from '../components/PumpSearchBar.vue';
 import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
-import { pumps } from '../data/mockPumps';
+import { pumps, type FuelType } from '../data/mockPumps';
 import { useI18n } from '../i18n';
 
 type SerialBooking = {
   id: string;
   pumpId: string;
   serial: number;
-  fuelType: string;
+  fuelType: FuelType;
   pumpName: string;
   runningSerial: number;
   remainingSlots: number;
@@ -39,22 +39,27 @@ const filteredPumps = computed(() => {
   });
 });
 
+function isFuelType(value: string): value is FuelType {
+  return value === 'diesel' || value === 'petrol' || value === 'octane';
+}
+
 function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
   const pump = pumps.find((item) => item.id === payload.pumpId);
-  if (!pump) {
+  if (!pump || !isFuelType(payload.fuelType)) {
     return;
   }
 
-  const gap = Math.max(payload.serial - pump.runningSerial, 0);
+  const fuelQueue = pump.fuelQueues[payload.fuelType];
+  const gap = Math.max(payload.serial - fuelQueue.runningSerial, 0);
   const newBooking: SerialBooking = {
     id: `${payload.pumpId}-${payload.fuelType}-${payload.serial}-${Date.now()}`,
     pumpId: payload.pumpId,
     serial: payload.serial,
     fuelType: payload.fuelType,
     pumpName: pump.name,
-    runningSerial: pump.runningSerial,
-    remainingSlots: pump.dailySerialLimit - pump.nextSerial,
-    etaMinutes: gap * pump.serviceMinutesPerVehicle,
+    runningSerial: fuelQueue.runningSerial,
+    remainingSlots: fuelQueue.dailySerialLimit - fuelQueue.nextSerial,
+    etaMinutes: gap * fuelQueue.serviceMinutesPerVehicle,
   };
 
   bookedSerials.value = [newBooking, ...bookedSerials.value];
@@ -101,9 +106,6 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
 
   <section v-else class="stack">
     <PumpSearchBar v-model="query" />
-
-    <p class="result-count">{{ t('home.resultCount', { count: filteredPumps.length }) }}</p>
-
     <div class="card-list">
       <PumpCard v-for="pump in filteredPumps" :key="pump.id" :pump="pump" @take-serial="handleTakeSerial" />
     </div>
