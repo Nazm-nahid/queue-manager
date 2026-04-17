@@ -1,0 +1,131 @@
+export const translations = {
+  bn: {
+    'titles.home': 'সিরিয়াল কত | পেট্রোল পাম্প সিরিয়াল',
+    'titles.pumpDetail': 'পাম্প বিস্তারিত | সিরিয়াল কত',
+    'titles.checkin': 'QR চেক-ইন | সিরিয়াল কত',
+
+    'app.brandName': 'সিরিয়াল কত?',
+    'app.brandTag': 'বাংলাদেশে পেট্রোল পাম্পের লাইভ সিরিয়াল ট্র্যাকিং',
+    'app.langBangla': 'বাংলা',
+    'app.langEnglish': 'English',
+
+    'home.kicker': 'teler serial | serial koto | তেলের সিরিয়াল',
+    'home.title': 'এক ট্যাপেই পেট্রোল পাম্প সিরিয়াল বুকিং',
+    'home.lead':
+      'রিয়েল-টাইমে পাম্পের সিরিয়াল ট্র্যাক করুন, অনলাইনে সিরিয়াল নিন, আর QR চেক-ইন করে তেল নিন',
+    'home.resultCount': '{count}টি পাম্প পাওয়া গেছে',
+
+    'search.label': 'নাম, ঠিকানা বা ম্যাপ লিংক দিয়ে পাম্প খুঁজুন',
+    'search.placeholder': 'উদাহরণ: ধানমন্ডি, মিরপুর, maps',
+
+    'pump.running': 'এখন চলছে',
+    'pump.next': 'আরও বাকি আছে',
+    'pump.slotsLeft': 'আজকের খালি স্লট',
+    'pump.viewMaps': 'ম্যাপ দেখুন',
+
+    'buttons.takeSerial': 'সিরিয়াল নিন',
+    'buttons.serialLimitReached': 'আজকের সিরিয়াল শেষ',
+
+    'snapshot.title': 'আপনার কিউ স্ট্যাটাস',
+    'snapshot.yourSerial': 'আপনার সিরিয়াল',
+    'snapshot.runningNow': 'এখন চলছে',
+    'snapshot.queueAhead': 'আপনার আগের মোট সিরিয়াল সংখ্যা',
+    'snapshot.slotsLeftToday': 'আজকের বাকি স্লট',
+    'snapshot.estimatedWait': 'আনুমানিক অপেক্ষা',
+    'snapshot.minutes': '{minutes} মিনিট',
+
+    'pumpDetail.kicker': 'petrol pump serial',
+    'pumpDetail.dailyLimit': 'দৈনিক সীমা',
+    'pumpDetail.runningSerial': 'চলমান সিরিয়াল',
+    'pumpDetail.nextAvailable': 'পরবর্তী সিরিয়াল',
+    'pumpDetail.hint': 'সিরিয়াল নিলে আপনার লাইভ কিউ স্ট্যাটাস ও ETA দেখাবে।',
+    'pumpDetail.openCheckin': 'QR স্ক্যান করুন',
+    'pumpDetail.notFound': 'পাম্প পাওয়া যায়নি',
+    'pumpDetail.notFoundLead': 'এই SEO URL টি ভুল হতে পারে বা সরিয়ে ফেলা হয়েছে।',
+
+    'checkin.kicker': 'QR উপস্থিতি নিশ্চিতকরণ',
+    'checkin.lead': 'আপনার উপস্থিতি নিশ্চিত করুন, তাহলে কিউ স্ট্যাটাস active হবে।',
+    'checkin.token': 'টোকেন',
+    'checkin.howWorks': 'কিভাবে কাজ করে',
+    'checkin.step1': '1. পাম্পে পৌঁছে QR কোড স্ক্যান করুন।',
+    'checkin.step2': '2. প্রয়োজন হলে Google দিয়ে সাইন-ইন করুন।',
+    'checkin.step3': '3. Confirm চাপলে আপনার স্ট্যাটাস active হবে।',
+    'checkin.confirmArrival': 'উপস্থিতি নিশ্চিত করুন',
+    'checkin.confirmed': 'চেক-ইন সম্পন্ন',
+    'checkin.success': 'আপনার স্ট্যাটাস active হয়েছে। সিরিয়াল ডাকলে সার্ভিস লেনে যান।',
+    'checkin.invalidTitle': 'অকার্যকর QR',
+    'checkin.invalidLead': 'এই QR কোডের সাথে কোনও রেজিস্টার্ড পাম্প মেলেনি।',
+
+    'common.backToSearch': 'সার্চে ফিরে যান',
+    'common.backToHome': 'হোমে ফিরে যান',
+    'people': 'জন',
+    'number': 'নম্বর',
+    'ti': 'টি',
+  },
+  en: {
+    'titles.home': 'Serial Koto | Petrol Pump Serial',
+    'titles.pumpDetail': 'Pump Details | Serial Koto',
+    'titles.checkin': 'QR Check-in | Serial Koto',
+
+    'app.brandName': 'Serial Koto?',
+    'app.brandTag': 'Fuel queue Bangladesh',
+    'app.langBangla': 'বাংলা',
+    'app.langEnglish': 'English',
+
+    'home.kicker': 'teler serial | serial koto | তেলের সিরিয়াল',
+    'home.title': 'Petrol pump serial booking in one tap',
+    'home.lead':
+      'Track fuel queue Bangladesh in real-time, grab your serial remotely, and arrive with QR check-in.',
+    'home.resultCount': '{count} pumps found',
+
+    'search.label': 'Search pump by name, address, or maps link',
+    'search.placeholder': 'Try: Dhanmondi, Mirpur, maps',
+
+    'pump.running': 'Running',
+    'pump.next': 'Next',
+    'pump.slotsLeft': 'Slots left',
+    'pump.viewMaps': 'View Maps',
+
+    'buttons.takeSerial': 'Take Serial',
+    'buttons.serialLimitReached': 'Serial Limit Reached',
+
+    'snapshot.title': 'Your Queue Snapshot',
+    'snapshot.yourSerial': 'Your serial',
+    'snapshot.runningNow': 'Running now',
+    'snapshot.queueAhead': 'Queue ahead',
+    'snapshot.slotsLeftToday': 'Slots left today',
+    'snapshot.estimatedWait': 'Estimated wait',
+    'snapshot.minutes': '{minutes} min',
+
+    'pumpDetail.kicker': 'petrol pump serial',
+    'pumpDetail.dailyLimit': 'Daily limit',
+    'pumpDetail.runningSerial': 'Running serial',
+    'pumpDetail.nextAvailable': 'Next available',
+    'pumpDetail.hint': 'Take a serial to see your live queue snapshot and ETA.',
+    'pumpDetail.openCheckin': 'Open QR Check-in Screen',
+    'pumpDetail.notFound': 'Pump Not Found',
+    'pumpDetail.notFoundLead': 'This SEO URL may be invalid or removed.',
+
+    'checkin.kicker': 'QR Arrival Confirmation',
+    'checkin.lead': 'Confirm your presence to activate your queue status.',
+    'checkin.token': 'Token',
+    'checkin.howWorks': 'How this works',
+    'checkin.step1': '1. Scan the pump QR code on arrival.',
+    'checkin.step2': '2. Sign in with Google if prompted.',
+    'checkin.step3': '3. Tap confirm to set your serial status to active.',
+    'checkin.confirmArrival': 'Confirm Arrival',
+    'checkin.confirmed': 'Check-in Confirmed',
+    'checkin.success': 'Your status is now active. Proceed to the service lane when your serial is called.',
+    'checkin.invalidTitle': 'Invalid QR',
+    'checkin.invalidLead': 'We could not match this QR code to any registered pump.',
+
+    'common.backToSearch': 'Back to Search',
+    'common.backToHome': 'Back to Home',
+    'people': 'people',
+    'number': 'number',
+    'ti': '',
+  },
+} as const;
+
+export type Locale = keyof typeof translations;
+export type TranslationKey = keyof (typeof translations)['en'];
