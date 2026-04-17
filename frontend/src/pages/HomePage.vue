@@ -1,30 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
 import PumpCard from '../components/PumpCard.vue';
 import PumpSearchBar from '../components/PumpSearchBar.vue';
 import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
-import { pumps } from '../data/mockPumps';
+import { pumps, type Pump } from '../data/mockPumps';
 import { useI18n } from '../i18n';
 
 
 const query = ref('');
 const { t } = useI18n();
-const route = useRoute();
-
-const selectedPump = computed(() => {
-  return pumps.find((pump) => pump.slug === String(route.params.slug));
-});
 
 const bookedSerial = ref<number | null>(null);
+const bookedFuelType = ref<string | null>(null);
+const bookedPump = ref<Pump | null>(null);
 
 const estimatedMinutes = computed(() => {
-  if (!selectedPump.value || bookedSerial.value === null) {
+  if (!bookedPump.value || bookedSerial.value === null) {
     return 0;
   }
 
-  const gap = Math.max(bookedSerial.value - selectedPump.value.runningSerial, 0);
-  return gap * selectedPump.value.serviceMinutesPerVehicle;
+  const gap = Math.max(bookedSerial.value - bookedPump.value.runningSerial, 0);
+  return gap * bookedPump.value.serviceMinutesPerVehicle;
 });
 
 const filteredPumps = computed(() => {
@@ -41,6 +37,12 @@ const filteredPumps = computed(() => {
     );
   });
 });
+
+function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
+  bookedSerial.value = payload.serial;
+  bookedFuelType.value = payload.fuelType;
+  bookedPump.value = pumps.find((pump) => pump.id === payload.pumpId) ?? null;
+}
 </script>
 
 <template>
@@ -51,11 +53,12 @@ const filteredPumps = computed(() => {
   </section>
 
   <QueueSnapshotCard
-    v-if="bookedSerial !== null && selectedPump"
+    v-if="bookedSerial !== null && bookedPump"
     :user-serial="bookedSerial"
-    :running-serial="selectedPump.runningSerial"
-    :remaining-slots="selectedPump.dailySerialLimit - selectedPump.nextSerial"
+    :running-serial="bookedPump.runningSerial"
+    :remaining-slots="bookedPump.dailySerialLimit - bookedPump.nextSerial"
     :eta-minutes="estimatedMinutes"
+    :fuel-type="bookedFuelType"
   />
 
   <section class="stack">
@@ -64,7 +67,7 @@ const filteredPumps = computed(() => {
     <p class="result-count">{{ t('home.resultCount', { count: filteredPumps.length }) }}</p>
 
     <div class="card-list">
-      <PumpCard v-for="pump in filteredPumps" :key="pump.id" :pump="pump" />
+      <PumpCard v-for="pump in filteredPumps" :key="pump.id" :pump="pump" @take-serial="handleTakeSerial" />
     </div>
   </section>
 </template>

@@ -282,6 +282,15 @@ button.solid-button {
   margin-bottom: 0.2rem;
 }
 
+.snapshot-fuel {
+  margin-top: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  background: #eef8f2;
+  color: var(--brand);
+  border: 1px solid rgba(9, 87, 63, 0.12);
+}
+
 .tiny,
 .hint-text {
   font-size: 0.86rem;
@@ -300,6 +309,24 @@ button.solid-button {
   background: #e8f5ec;
   border-radius: 12px;
   padding: 0.7rem;
+}
+
+.serial-chip-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.fuel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+
+.fuel-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(9, 87, 63, 0.28);
 }
 
 @keyframes rise {
@@ -334,5 +361,9 @@ button.solid-button {
   .banner-image {
     height: 220px;
     border-radius: 12px;
+  }
+
+  .serial-chip-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
