@@ -3,25 +3,24 @@ import { computed, ref } from 'vue';
 import PumpCard from '../components/PumpCard.vue';
 import PumpSearchBar from '../components/PumpSearchBar.vue';
 import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
-import { pumps, type Pump } from '../data/mockPumps';
+import { pumps } from '../data/mockPumps';
 import { useI18n } from '../i18n';
+
+type SerialBooking = {
+  id: string;
+  serial: number;
+  fuelType: string;
+  pumpName: string;
+  runningSerial: number;
+  remainingSlots: number;
+  etaMinutes: number;
+};
 
 
 const query = ref('');
 const { t } = useI18n();
 
-const bookedSerial = ref<number | null>(null);
-const bookedFuelType = ref<string | null>(null);
-const bookedPump = ref<Pump | null>(null);
-
-const estimatedMinutes = computed(() => {
-  if (!bookedPump.value || bookedSerial.value === null) {
-    return 0;
-  }
-
-  const gap = Math.max(bookedSerial.value - bookedPump.value.runningSerial, 0);
-  return gap * bookedPump.value.serviceMinutesPerVehicle;
-});
+const bookedSerials = ref<SerialBooking[]>([]);
 
 const filteredPumps = computed(() => {
   const term = query.value.toLowerCase().trim();
@@ -39,9 +38,23 @@ const filteredPumps = computed(() => {
 });
 
 function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
-  bookedSerial.value = payload.serial;
-  bookedFuelType.value = payload.fuelType;
-  bookedPump.value = pumps.find((pump) => pump.id === payload.pumpId) ?? null;
+  const pump = pumps.find((item) => item.id === payload.pumpId);
+  if (!pump) {
+    return;
+  }
+
+  const gap = Math.max(payload.serial - pump.runningSerial, 0);
+  const newBooking: SerialBooking = {
+    id: `${payload.pumpId}-${payload.fuelType}-${payload.serial}-${Date.now()}`,
+    serial: payload.serial,
+    fuelType: payload.fuelType,
+    pumpName: pump.name,
+    runningSerial: pump.runningSerial,
+    remainingSlots: pump.dailySerialLimit - pump.nextSerial,
+    etaMinutes: gap * pump.serviceMinutesPerVehicle,
+  };
+
+  bookedSerials.value = [newBooking, ...bookedSerials.value];
 }
 </script>
 
@@ -52,14 +65,7 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
     <p class="lead">{{ t('home.lead') }}</p>
   </section>
 
-  <QueueSnapshotCard
-    v-if="bookedSerial !== null && bookedPump"
-    :user-serial="bookedSerial"
-    :running-serial="bookedPump.runningSerial"
-    :remaining-slots="bookedPump.dailySerialLimit - bookedPump.nextSerial"
-    :eta-minutes="estimatedMinutes"
-    :fuel-type="bookedFuelType"
-  />
+  <QueueSnapshotCard v-if="bookedSerials.length > 0" :bookings="bookedSerials" />
 
   <section class="stack">
     <PumpSearchBar v-model="query" />
