@@ -1,12 +1,28 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import type { Pump } from '../data/mockPumps';
 import { useI18n } from '../i18n';
+import QrScannerModal from './QrScannerModal.vue';
 
-defineProps<{ pump: Pump }>();
+const props = defineProps<{ pump: Pump }>();
 const { t } = useI18n();
+const router = useRouter();
+const isScannerOpen = ref(false);
 
 function handleSerial(pumpId: string | number) {
   alert("Your serial is: " + pumpId);
+}
+
+function openScanner() {
+  isScannerOpen.value = true;
+}
+
+function handleQrScan(scannedValue: string) {
+  void router.push({
+    path: `/checkin/${props.pump.id}`,
+    query: { token: scannedValue },
+  });
 }
 </script>
 
@@ -28,10 +44,18 @@ function handleSerial(pumpId: string | number) {
           {{ t('pump.viewMaps') }}
         </a>
         <button @click="handleSerial(pump.id)" class="solid-button">{{ t('buttons.takeSerial') }}</button>
-        <router-link :to="`/checkin/${pump.id}`" class="ghost-button centered">
+        <button type="button" class="ghost-button centered" @click="openScanner">
           {{ t('pumpDetail.openCheckin') }}
-        </router-link>
+        </button>
       </div>
     </div>
+
+    <QrScannerModal
+      :open="isScannerOpen"
+      :title="t('qrScanner.title')"
+      :hint="t('qrScanner.subtitle')"
+      @close="isScannerOpen = false"
+      @scan="handleQrScan"
+    />
   </article>
 </template>

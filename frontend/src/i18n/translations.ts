@@ -43,6 +43,14 @@ export const translations = {
     'pumpDetail.notFound': 'পাম্প পাওয়া যায়নি',
     'pumpDetail.notFoundLead': 'এই SEO URL টি ভুল হতে পারে বা সরিয়ে ফেলা হয়েছে।',
 
+    'qrScanner.title': 'QR কোড স্ক্যান করুন',
+    'qrScanner.subtitle': 'ক্যামেরার সামনে QR কোড ধরুন, তারপর আমরা আপনাকে চেক-ইন স্ক্রিনে নিয়ে যাব।',
+    'qrScanner.hint': 'ফোনের ক্যামেরা অনুমতি দিন এবং কোডটি ফ্রেমের মধ্যে রাখুন।',
+    'qrScanner.pointCamera': 'QR কোডটি মাঝখানের ফ্রেমে আনুন।',
+    'qrScanner.scanning': 'ক্যামেরা চালু হচ্ছে...',
+    'qrScanner.cameraUnavailable': 'ক্যামেরা চালু করা যাচ্ছে না।',
+    'qrScanner.close': 'বন্ধ করুন',
+
     'checkin.kicker': 'QR উপস্থিতি নিশ্চিতকরণ',
     'checkin.lead': 'আপনার উপস্থিতি নিশ্চিত করুন, তাহলে কিউ স্ট্যাটাস active হবে।',
     'checkin.token': 'টোকেন',
@@ -105,6 +113,14 @@ export const translations = {
     'pumpDetail.openCheckin': 'Open QR Check-in Screen',
     'pumpDetail.notFound': 'Pump Not Found',
     'pumpDetail.notFoundLead': 'This SEO URL may be invalid or removed.',
+
+    'qrScanner.title': 'Scan QR Code',
+    'qrScanner.subtitle': 'Hold the QR code in front of the camera and we will take you to the check-in screen.',
+    'qrScanner.hint': 'Allow camera access and keep the code inside the frame.',
+    'qrScanner.pointCamera': 'Place the QR code inside the frame.',
+    'qrScanner.scanning': 'Starting camera...',
+    'qrScanner.cameraUnavailable': 'Camera is unavailable.',
+    'qrScanner.close': 'Close',
 
     'checkin.kicker': 'QR Arrival Confirmation',
     'checkin.lead': 'Confirm your presence to activate your queue status.',

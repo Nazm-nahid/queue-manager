@@ -257,6 +257,11 @@ h2 {
   align-self: center;
 }
 
+button.ghost-button,
+button.solid-button {
+  appearance: none;
+}
+
 .snapshot-grid {
   margin-top: 0.7rem;
   display: grid;
