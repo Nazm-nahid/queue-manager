@@ -19,6 +19,7 @@ type SerialBooking = {
 
 const query = ref('');
 const { t } = useI18n();
+const activeHomeTab = ref<'queue' | 'search'>('queue');
 
 const bookedSerials = ref<SerialBooking[]>([]);
 
@@ -65,9 +66,38 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
     <p class="lead">{{ t('home.lead') }}</p>
   </section>
 
-  <QueueSnapshotCard v-if="bookedSerials.length > 0" :bookings="bookedSerials" />
+  <section class="home-tabs" role="tablist" :aria-label="t('home.tabs.title')">
+    <button
+      type="button"
+      class="home-tab"
+      :class="{ active: activeHomeTab === 'search' }"
+      role="tab"
+      :aria-selected="activeHomeTab === 'search'"
+      @click="activeHomeTab = 'search'"
+    >
+      {{ t('home.tabs.search') }}
+    </button>
+    <button
+      type="button"
+      class="home-tab"
+      :class="{ active: activeHomeTab === 'queue' }"
+      role="tab"
+      :aria-selected="activeHomeTab === 'queue'"
+      @click="activeHomeTab = 'queue'"
+    >
+      {{ t('home.tabs.queue') }}
+    </button>
+  </section>
 
-  <section class="stack">
+  <section v-if="activeHomeTab === 'queue'" class="stack">
+    <QueueSnapshotCard v-if="bookedSerials.length > 0" :bookings="bookedSerials" />
+    <article v-else class="panel">
+      <h2>{{ t('home.emptyQueueTitle') }}</h2>
+      <p class="hint-text">{{ t('home.emptyQueueLead') }}</p>
+    </article>
+  </section>
+
+  <section v-else class="stack">
     <PumpSearchBar v-model="query" />
 
     <p class="result-count">{{ t('home.resultCount', { count: filteredPumps.length }) }}</p>

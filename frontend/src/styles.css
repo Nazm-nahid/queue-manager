@@ -145,6 +145,31 @@ h2 {
   gap: 0.85rem;
 }
 
+.home-tabs {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.home-tab {
+  flex: 1;
+  border: 1px solid var(--stroke);
+  background: #f2f7f1;
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 0.72rem 0.8rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.home-tab.active {
+  background: var(--brand);
+  color: #f4fff9;
+  border-color: var(--brand);
+}
+
 .search-shell {
   display: flex;
   flex-direction: column;

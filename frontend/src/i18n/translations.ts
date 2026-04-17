@@ -14,6 +14,11 @@ export const translations = {
     'home.lead':
       'রিয়েল-টাইমে পাম্পের সিরিয়াল ট্র্যাক করুন, অনলাইনে সিরিয়াল নিন, আর QR চেক-ইন করে তেল নিন',
     'home.resultCount': '{count}টি পাম্প পাওয়া গেছে',
+    'home.tabs.title': 'হোম ট্যাব',
+    'home.tabs.queue': 'আমার সিরিয়াল গুলো',
+    'home.tabs.search': 'সিরিয়াল নিবো',
+    'home.emptyQueueTitle': 'এখনও কোনও সিরিয়াল নেওয়া হয়নি',
+    'home.emptyQueueLead': 'সার্চ ও পাম্প লিস্ট ট্যাবে গিয়ে সিরিয়াল নিন।',
 
     'search.label': 'নাম, ঠিকানা বা ম্যাপ লিংক দিয়ে পাম্প খুঁজুন',
     'search.placeholder': 'উদাহরণ: ধানমন্ডি, মিরপুর, maps',
@@ -99,6 +104,11 @@ export const translations = {
     'home.lead':
       'Track fuel queue Bangladesh in real-time, grab your serial remotely, and arrive with QR check-in.',
     'home.resultCount': '{count} pumps found',
+    'home.tabs.title': 'Home tabs',
+    'home.tabs.queue': 'My Serials',
+    'home.tabs.search': 'Take Serial',
+    'home.emptyQueueTitle': 'No serial booked yet',
+    'home.emptyQueueLead': 'Go to the Search & Pump List tab to take a serial.',
 
     'search.label': 'Search pump by name, address, or maps link',
     'search.placeholder': 'Try: Dhanmondi, Mirpur, maps',
