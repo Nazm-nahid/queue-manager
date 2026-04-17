@@ -34,12 +34,12 @@ export const translations = {
     'buttons.takeSerial': 'সিরিয়াল নিন',
     'buttons.serialLimitReached': 'আজকের সিরিয়াল শেষ',
 
-    'snapshot.title': 'আপনার কিউ স্ট্যাটাস',
+    'snapshot.title': 'সিরিয়ালের স্ট্যাটাস',
     'snapshot.yourSerial': 'আপনার সিরিয়াল',
     'snapshot.runningNow': 'এখন চলছে',
-    'snapshot.queueAhead': 'আপনার আগের মোট সিরিয়াল সংখ্যা',
+    'snapshot.queueAhead': 'আপনার আগের মোট সিরিয়াল সংখ্যা',
     'snapshot.slotsLeftToday': 'আজকের বাকি স্লট',
-    'snapshot.estimatedWait': 'আনুমানিক অপেক্ষা',
+    'snapshot.estimatedWait': 'আরো অপেক্ষা করতে হবে',
     'snapshot.minutes': '{minutes} মিনিট',
     'snapshot.selectedFuel': 'নির্বাচিত জ্বালানি',
 
