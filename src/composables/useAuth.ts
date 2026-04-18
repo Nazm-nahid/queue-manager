@@ -30,13 +30,17 @@ if (auth) {
 
     if (!isAuthReady.value) {
       isAuthReady.value = true;
-      resolveAuthReady?.();
+      if (resolveAuthReady) {
+        resolveAuthReady();
+      }
       resolveAuthReady = null;
     }
   });
 } else {
   isAuthReady.value = true;
-  resolveAuthReady?.();
+  if (resolveAuthReady) {
+    // resolveAuthReady();
+  }
   resolveAuthReady = null;
 }
 
