@@ -3,13 +3,15 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from '../composables/useToast';
 import { useAuth } from '../composables/useAuth';
+import { useAuthModal } from '../composables/useAuthModal';
 import { useI18n } from '../i18n';
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const { t } = useI18n();
-const { currentUser, signInWithGoogle } = useAuth();
+const { currentUser } = useAuth();
+const { openAuthModal } = useAuthModal();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
@@ -25,12 +27,14 @@ async function handleSubmit() {
   isSubmitting.value = true;
 
   try {
-    await signInWithGoogle();
-    toast.success(t('auth.signInSuccess'));
+    const signedIn = await openAuthModal();
+    if (signedIn) {
+      toast.success(t('auth.signInSuccess'));
+      await router.replace(redirectPath.value);
+      return;
+    }
 
-    await router.replace(redirectPath.value);
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('auth.genericError');
+    errorMessage.value = t('auth.genericError');
   } finally {
     isSubmitting.value = false;
   }
@@ -42,7 +46,7 @@ async function handleSubmit() {
     <article class="auth-card panel">
       <p class="kicker">{{ t('auth.kicker') }}</p>
       <h1>{{ t('auth.title') }}</h1>
-      <p class="lead auth-lead">{{ t('auth.googleLead') }}</p>
+      <p class="lead auth-lead">{{ t('auth.lead') }}</p>
 
       <form class="auth-form" @submit.prevent="handleSubmit">
         <p class="auth-note auth-google-note">{{ t('auth.googleHint') }}</p>
@@ -50,7 +54,7 @@ async function handleSubmit() {
         <p v-if="errorMessage" class="auth-error">{{ errorMessage }}</p>
 
         <button type="submit" class="solid-button full" :disabled="isSubmitting">
-          {{ isSubmitting ? t('auth.waiting') : t('auth.googleButton') }}
+          {{ isSubmitting ? t('auth.waiting') : t('auth.signIn') }}
         </button>
       </form>
 

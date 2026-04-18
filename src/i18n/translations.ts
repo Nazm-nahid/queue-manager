@@ -16,6 +16,10 @@ export const translations = {
     'auth.googleLead': 'এক ক্লিকে Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন।',
     'auth.googleHint': 'আপনার Google অ্যাকাউন্ট ব্যবহার করে নিরাপদে সাইন ইন হবে।',
     'auth.googleButton': 'Google দিয়ে সাইন ইন',
+    'auth.orContinueWithGoogle': 'অথবা Google দিয়ে চালিয়ে যান',
+    'auth.email': 'ইমেইল',
+    'auth.password': 'পাসওয়ার্ড',
+    'auth.createAccount': 'অ্যাকাউন্ট খুলুন',
     'auth.waiting': 'অপেক্ষা করুন...',
     'auth.genericError': 'সাইন ইন করা যায়নি। আবার চেষ্টা করুন।',
     'auth.signInSuccess': 'সাইন ইন সফল হয়েছে।',
@@ -139,6 +143,10 @@ export const translations = {
     'auth.googleLead': 'Sign in with your Google account in one click.',
     'auth.googleHint': 'Your Google account will be used to sign you in securely.',
     'auth.googleButton': 'Continue with Google',
+    'auth.orContinueWithGoogle': 'Or continue with Google',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.createAccount': 'Create account',
     'auth.waiting': 'Please wait...',
     'auth.genericError': 'Could not sign in. Please try again.',
     'auth.signInSuccess': 'Signed in successfully.',
@@ -248,4 +256,9 @@ export const translations = {
 } as const;
 
 export type Locale = keyof typeof translations;
-export type TranslationKey = keyof (typeof translations)['en'];
+export type TranslationKey =
+  | keyof (typeof translations)['en']
+  | 'auth.orContinueWithGoogle'
+  | 'auth.email'
+  | 'auth.password'
+  | 'auth.createAccount';

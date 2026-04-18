@@ -1,9 +1,11 @@
 import { ref } from 'vue';
 import {
   browserLocalPersistence,
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
   setPersistence,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
@@ -11,6 +13,9 @@ import {
 import { auth, isFirebaseConfigured } from '../lib/firebase';
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+});
 
 const currentUser = ref<User | null>(null);
 const isAuthReady = ref(!auth);
@@ -56,6 +61,16 @@ export function useAuth() {
     await signInWithPopup(auth!, googleProvider);
   }
 
+  async function signInWithEmailPassword(email: string, password: string) {
+    requireAuth();
+    await signInWithEmailAndPassword(auth!, email, password);
+  }
+
+  async function signUpWithEmailPassword(email: string, password: string) {
+    requireAuth();
+    await createUserWithEmailAndPassword(auth!, email, password);
+  }
+
   async function signOut() {
     requireAuth();
     await firebaseSignOut(auth!);
@@ -65,6 +80,8 @@ export function useAuth() {
     currentUser,
     isAuthReady,
     signInWithGoogle,
+    signInWithEmailPassword,
+    signUpWithEmailPassword,
     signOut,
   };
 }

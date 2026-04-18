@@ -18,7 +18,6 @@ const router = createRouter({
       component: () => import('../pages/CheckinPage.vue'),
       meta: {
         titleKey: 'titles.checkin',
-        requiresAuth: true,
       },
     },
     {
@@ -36,14 +35,6 @@ router.beforeEach(async (to) => {
   await waitForAuthReady();
 
   const { currentUser } = useAuth();
-  const requiresAuth = (to.meta as { requiresAuth?: boolean }).requiresAuth === true;
-
-  if (requiresAuth && !currentUser.value) {
-    return {
-      name: 'auth',
-      query: { redirect: to.fullPath },
-    };
-  }
 
   if (to.name === 'auth' && currentUser.value) {
     const redirect =

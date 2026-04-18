@@ -6,6 +6,7 @@ import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
 import { pumps, type FuelType } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
+import { useAuthModal } from '../composables/useAuthModal';
 import { watchUserBookings } from '../services/bookingService';
 import { fetchPumpsFromFirebase, takeSerialFromFirebase } from '../services/pumpService';
 import { useAuth } from '../composables/useAuth';
@@ -27,7 +28,8 @@ type SerialBooking = {
 const query = ref('');
 const { t } = useI18n();
 const toast = useToast();
-const { currentUser, signInWithGoogle } = useAuth();
+const { currentUser } = useAuth();
+const { openAuthModal } = useAuthModal();
 const activeHomeTab = ref<'queue' | 'search'>('queue');
 
 const bookedSerials = ref<SerialBooking[]>([]);
@@ -129,13 +131,13 @@ onBeforeUnmount(() => {
 
 async function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
   if (!currentUser.value) {
-    try {
-      await signInWithGoogle();
-      toast.success(t('auth.signInSuccess'));
-    } catch {
+    const signedIn = await openAuthModal();
+    if (!signedIn || !currentUser.value) {
       toast.info(t('auth.signInToTakeSerial'));
       return;
     }
+
+    toast.success(t('auth.signInSuccess'));
   }
 
   if (!navigator.onLine) {
@@ -186,12 +188,13 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
     }
 
     if (error instanceof Error && error.message === 'AUTH_REQUIRED') {
-      try {
-        await signInWithGoogle();
-        toast.success(t('auth.signInSuccess'));
-      } catch {
+      const signedIn = await openAuthModal();
+      if (!signedIn || !currentUser.value) {
         toast.info(t('auth.signInToTakeSerial'));
+        return;
       }
+
+      toast.success(t('auth.signInSuccess'));
       return;
     }
 
@@ -237,7 +240,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       <p class="hint-text">
         {{ currentUser ? t('home.emptyQueueLead') : t('auth.queueLead') }}
       </p>
-      <button v-if="!currentUser" type="button" class="solid-button centered" @click="signInWithGoogle">
+      <button v-if="!currentUser" type="button" class="solid-button centered" @click="openAuthModal">
         {{ t('auth.signIn') }}
       </button>
     </article>

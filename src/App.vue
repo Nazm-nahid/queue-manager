@@ -3,15 +3,18 @@ import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { setLocale, useI18n } from './i18n';
 import type { TranslationKey } from './i18n/translations';
+import AuthPopupModal from './components/AuthPopupModal.vue';
 import ToastStack from './components/ToastStack.vue';
 import { useAuth } from './composables/useAuth';
+import { useAuthModal } from './composables/useAuthModal';
 import { useToast } from './composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
 const { locale, t } = useI18n();
 const toast = useToast();
-const { currentUser, signInWithGoogle, signOut } = useAuth();
+const { currentUser, signOut } = useAuth();
+const { openAuthModal } = useAuthModal();
 
 watch(
   [() => route.meta.titleKey as TranslationKey | undefined, locale],
@@ -34,11 +37,9 @@ async function handleSignOut() {
 }
 
 async function handleSignIn() {
-  try {
-    await signInWithGoogle();
+  const signedIn = await openAuthModal();
+  if (signedIn) {
     toast.success(t('auth.signInSuccess'));
-  } catch {
-    toast.error(t('auth.genericError'));
   }
 }
 </script>
@@ -88,5 +89,6 @@ async function handleSignIn() {
     </main>
 
     <ToastStack />
+    <AuthPopupModal />
   </div>
 </template>

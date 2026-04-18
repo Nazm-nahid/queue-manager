@@ -7,6 +7,7 @@ import { useI18n } from '../i18n';
 import { saveCheckinToFirebase } from '../services/checkinService';
 import { fetchPumpByIdFromFirebase } from '../services/pumpService';
 import { useAuth } from '../composables/useAuth';
+import { useAuthModal } from '../composables/useAuthModal';
 
 const route = useRoute();
 const hasCheckedIn = ref(false);
@@ -15,14 +16,13 @@ const pump = ref<Pump | null>(null);
 const isLoadingPump = ref(true);
 const { t } = useI18n();
 const toast = useToast();
-const { currentUser, signInWithGoogle } = useAuth();
+const { currentUser } = useAuth();
+const { openAuthModal } = useAuthModal();
 
 async function handleSignIn() {
-  try {
-    await signInWithGoogle();
+  const signedIn = await openAuthModal();
+  if (signedIn) {
     toast.success(t('auth.signInSuccess'));
-  } catch {
-    toast.error(t('auth.genericError'));
   }
 }
 
