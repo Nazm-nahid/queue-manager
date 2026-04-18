@@ -32,7 +32,7 @@ const { t } = useI18n();
 const toast = useToast();
 const { currentUser } = useAuth();
 const { openAuthModal } = useAuthModal();
-const activeHomeTab = ref<'queue' | 'search'>('queue');
+const activeHomeTab = ref<'queue' | 'search'>('search');
 
 const bookedSerials = ref<SerialBooking[]>([]);
 const availablePumps = ref<typeof pumps>([]);
