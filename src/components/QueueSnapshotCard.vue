@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
@@ -9,6 +9,7 @@ const props = defineProps<{
   bookings: Array<{
     id: string;
     pumpId: string;
+    createdAtMs: number;
     serial: number;
     runningSerial: number;
     remainingSlots: number;
@@ -20,15 +21,11 @@ const props = defineProps<{
 }>();
 
 const scannerBooking = ref<(typeof props.bookings)[number] | null>(null);
-const etaCountdownSeconds = ref<Record<string, number>>({});
+const nowMs = ref(Date.now());
 const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
 let countdownTimerId: number | null = null;
-
-function queueAhead(serial: number, runningSerial: number) {
-  return Math.max(serial - runningSerial, 0);
-}
 
 function fuelLabel(fuelType?: string | null) {
   if (!fuelType) {
@@ -50,30 +47,13 @@ function closeScanner() {
   scannerBooking.value = null;
 }
 
-function syncCountdownState() {
-  const nextState: Record<string, number> = {};
-
-  for (const booking of props.bookings) {
-    if (etaCountdownSeconds.value[booking.id] !== undefined) {
-      nextState[booking.id] = etaCountdownSeconds.value[booking.id];
-      continue;
-    }
-
-    nextState[booking.id] = Math.max(booking.etaMinutes * 60, 0);
-  }
-
-  etaCountdownSeconds.value = nextState;
-}
-
 function startCountdown() {
   if (countdownTimerId !== null) {
     return;
   }
 
   countdownTimerId = window.setInterval(() => {
-    etaCountdownSeconds.value = Object.fromEntries(
-      Object.entries(etaCountdownSeconds.value).map(([id, seconds]) => [id, Math.max(seconds - 1, 0)]),
-    );
+    nowMs.value = Date.now();
   }, 1000);
 }
 
@@ -93,13 +73,11 @@ function formatCountdown(totalSeconds: number) {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-watch(
-  () => props.bookings,
-  () => {
-    syncCountdownState();
-  },
-  { immediate: true },
-);
+function remainingEtaSeconds(booking: (typeof props.bookings)[number]) {
+  const totalSeconds = Math.max(booking.etaMinutes * 60, 0);
+  const elapsedSeconds = Math.max(Math.floor((nowMs.value - booking.createdAtMs) / 1000), 0);
+  return Math.max(totalSeconds - elapsedSeconds, 0);
+}
 
 onMounted(startCountdown);
 onBeforeUnmount(stopCountdown);
@@ -160,7 +138,7 @@ async function handleQrScan(scannedValue: string) {
         <div class="snapshot-simple-stats">
           <div>
             <p class="snapshot-simple-wait-label">{{ t('snapshot.estimatedWait') }}</p>
-            <p class="snapshot-simple-wait-time">{{ formatCountdown(etaCountdownSeconds[booking.id] ?? 0) }} {{ t('snapshot.minutes') }}</p>
+            <p class="snapshot-simple-wait-time">{{ formatCountdown(remainingEtaSeconds(booking)) }} {{ t('snapshot.minutes') }}</p>
           </div>
           <div>
             <p class="tiny snapshot-simple-fuel">

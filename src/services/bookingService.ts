@@ -5,6 +5,7 @@ import type { FuelType } from '../data/mockPumps';
 export type SerialBookingRecord = {
   id: string;
   pumpId: string;
+  createdAtMs: number;
   serial: number;
   fuelType: FuelType;
   pumpName: string;
@@ -21,9 +22,14 @@ function assertDbReady() {
 }
 
 function toSerialBooking(docId: string, data: DocumentData): SerialBookingRecord {
+  const fallbackCreatedAtMs =
+    data.createdAt && typeof data.createdAt.toMillis === 'function' ? Number(data.createdAt.toMillis()) : 0;
+  const createdAtMs = Number(data.createdAtMs || fallbackCreatedAtMs || Date.now());
+
   return {
     id: String(data.id || docId),
     pumpId: String(data.pumpId || ''),
+    createdAtMs,
     serial: Number(data.serial || 0),
     fuelType: String(data.fuelType || '') as FuelType,
     pumpName: String(data.pumpName || ''),

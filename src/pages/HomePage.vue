@@ -13,6 +13,7 @@ import { useAuth } from '../composables/useAuth';
 type SerialBooking = {
   id: string;
   pumpId: string;
+  createdAtMs: number;
   serial: number;
   fuelType: FuelType;
   pumpName: string;
@@ -158,6 +159,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
     const newBooking: SerialBooking = {
       id: result.bookingId,
       pumpId: payload.pumpId,
+      createdAtMs: result.createdAtMs,
       serial: result.serial,
       fuelType: payload.fuelType,
       pumpName: result.pumpName,

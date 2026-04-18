@@ -13,6 +13,7 @@ import type { FuelType, Pump } from '../data/mockPumps';
 
 export type TakeSerialResult = {
   bookingId: string;
+  createdAtMs: number;
   serial: number;
   runningSerial: number;
   remainingSlots: number;
@@ -88,6 +89,7 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
     }
 
     const serial = fuelQueue.nextSerial;
+    const createdAtMs = Date.now();
     transaction.update(pumpRef, {
       [`fuelQueues.${fuelType}.nextSerial`]: serial + 1,
     });
@@ -104,6 +106,7 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
       remainingSlots: Math.max(fuelQueue.dailySerialLimit - serial, 0),
       etaMinutes: Math.max(serial - fuelQueue.runningSerial, 0) * fuelQueue.serviceMinutesPerVehicle,
       createdAt: serverTimestamp(),
+      createdAtMs,
       userId,
     });
 
@@ -111,6 +114,7 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
 
     return {
       bookingId: bookingRef.id,
+      createdAtMs,
       serial,
       runningSerial: fuelQueue.runningSerial,
       remainingSlots: Math.max(fuelQueue.dailySerialLimit - serial, 0),
