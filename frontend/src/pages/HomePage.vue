@@ -6,6 +6,7 @@ import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
 import { pumps, type FuelType } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
+import { fetchPumpsFromFirebase, takeSerialFromFirebase } from '../services/pumpService';
 
 type SerialBooking = {
   id: string;
@@ -60,18 +61,16 @@ async function loadPumps() {
       throw new Error('offline');
     }
 
-    await new Promise<void>((resolve) => {
-      window.setTimeout(() => resolve(), 220);
-    });
-
-    availablePumps.value = pumps;
+    const firebasePumps = await fetchPumpsFromFirebase();
+    availablePumps.value = firebasePumps.length > 0 ? firebasePumps : pumps;
     if (!hasLoadedPumpListOnce) {
       hasLoadedPumpListOnce = true;
-      toast.success(t('toast.listLoadSuccess'));
+      
     }
   } catch {
-    availablePumps.value = [];
-    hasPumpLoadError.value = true;
+    // Keep app usable with local seed data if backend is unavailable.
+    availablePumps.value = pumps;
+    hasPumpLoadError.value = availablePumps.value.length === 0;
     toast.error(t('toast.listLoadFailed'));
   } finally {
     isLoadingPumps.value = false;
@@ -100,32 +99,71 @@ onBeforeUnmount(() => {
   window.removeEventListener('online', handleOnline);
 });
 
-function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
+async function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
   if (!navigator.onLine) {
     toast.error(t('toast.takeSerialFailed'));
     return;
   }
 
-  const pump = availablePumps.value.find((item) => item.id === payload.pumpId);
-  if (!pump || !isFuelType(payload.fuelType)) {
+  if (!isFuelType(payload.fuelType)) {
     toast.error(t('toast.takeSerialFailed'));
     return;
   }
 
-  const fuelQueue = pump.fuelQueues[payload.fuelType];
+  const bookingPayload = availablePumps.value.find((item) => item.id === payload.pumpId);
+  if (!bookingPayload) {
+    toast.error(t('toast.takeSerialFailed'));
+    return;
+  }
+
+  try {
+    const result = await takeSerialFromFirebase(payload.pumpId, payload.fuelType);
+    const newBooking: SerialBooking = {
+      id: `${payload.pumpId}-${payload.fuelType}-${result.serial}-${Date.now()}`,
+      pumpId: payload.pumpId,
+      serial: result.serial,
+      fuelType: payload.fuelType,
+      pumpName: result.pumpName,
+      pumpLocation: result.pumpLocation,
+      runningSerial: result.runningSerial,
+      remainingSlots: result.remainingSlots,
+      etaMinutes: result.etaMinutes,
+    };
+
+    bookedSerials.value = [newBooking, ...bookedSerials.value];
+    toast.success(
+      t('toast.takeSerialSuccess', {
+        serial: result.serial,
+        fuel: t(`fuelTypes.${payload.fuelType}`),
+        pump: result.pumpName,
+      }),
+    );
+    void loadPumps();
+    return;
+  } catch (error) {
+    if (error instanceof Error && error.message === 'SERIAL_LIMIT_REACHED') {
+      toast.error(t('buttons.serialLimitReached'));
+      return;
+    }
+
+    // Fallback path while firebase is not configured.
+  }
+
+  const fuelQueue = bookingPayload.fuelQueues[payload.fuelType];
   if (fuelQueue.nextSerial > fuelQueue.dailySerialLimit) {
     toast.error(t('buttons.serialLimitReached'));
     return;
   }
 
-  const gap = Math.max(payload.serial - fuelQueue.runningSerial, 0);
+  const serial = fuelQueue.nextSerial;
+  const gap = Math.max(serial - fuelQueue.runningSerial, 0);
   const newBooking: SerialBooking = {
-    id: `${payload.pumpId}-${payload.fuelType}-${payload.serial}-${Date.now()}`,
+    id: `${payload.pumpId}-${payload.fuelType}-${serial}-${Date.now()}`,
     pumpId: payload.pumpId,
-    serial: payload.serial,
+    serial,
     fuelType: payload.fuelType,
-    pumpName: pump.name,
-    pumpLocation: pump.address,
+    pumpName: bookingPayload.name,
+    pumpLocation: bookingPayload.address,
     runningSerial: fuelQueue.runningSerial,
     remainingSlots: fuelQueue.dailySerialLimit - fuelQueue.nextSerial,
     etaMinutes: gap * fuelQueue.serviceMinutesPerVehicle,
@@ -135,9 +173,9 @@ function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: s
   fuelQueue.nextSerial += 1;
   toast.success(
     t('toast.takeSerialSuccess', {
-      serial: payload.serial,
+      serial,
       fuel: t(`fuelTypes.${payload.fuelType}`),
-      pump: pump.name,
+      pump: bookingPayload.name,
     }),
   );
 }

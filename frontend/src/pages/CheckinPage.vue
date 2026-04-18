@@ -1,28 +1,64 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { pumps } from '../data/mockPumps';
+import { pumps, type Pump } from '../data/mockPumps';
+import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
+import { saveCheckinToFirebase } from '../services/checkinService';
+import { fetchPumpByIdFromFirebase } from '../services/pumpService';
 
 const route = useRoute();
 const hasCheckedIn = ref(false);
 const token = computed(() => String(route.query.token || 'demo-token'));
+const pump = ref<Pump | null>(null);
+const isLoadingPump = ref(true);
 const { t } = useI18n();
+const toast = useToast();
 
-const pump = computed(() => {
-  return pumps.find((item) => item.id === String(route.params.pumpId));
-});
+async function loadPump() {
+  isLoadingPump.value = true;
+  const pumpId = String(route.params.pumpId);
 
-function confirmCheckin() {
-  hasCheckedIn.value = true;
+  try {
+    const backendPump = await fetchPumpByIdFromFirebase(pumpId);
+    // If a specific Firestore pump document is missing, keep check-in usable with local seed data.
+    pump.value = backendPump || pumps.find((item) => item.id === pumpId) || null;
+  } catch {
+    pump.value = pumps.find((item) => item.id === pumpId) || null;
+  } finally {
+    isLoadingPump.value = false;
+  }
 }
+
+async function confirmCheckin() {
+  if (!pump.value) {
+    return;
+  }
+
+  try {
+    await saveCheckinToFirebase(pump.value.id, token.value);
+  } catch {
+    // Keep local success for demo mode when firebase is not configured.
+  }
+
+  hasCheckedIn.value = true;
+  toast.success(t('checkin.confirmed'));
+}
+
+onMounted(() => {
+  void loadPump();
+});
 </script>
 
 <template>
-  <section v-if="pump" class="stack">
+  <section v-if="isLoadingPump" class="panel">
+    <p class="hint-text">{{ t('home.loadingPumps') }}</p>
+  </section>
+
+  <section v-else-if="pump" class="stack">
     <article class="panel">
       <p class="kicker">{{ t('checkin.kicker') }}</p>
-      <h1>{{ pump.name }}</h1>
+      <h1>{{ pump?.name }}</h1>
       <p class="lead">{{ t('checkin.lead') }}</p>
       <p class="tiny">{{ t('checkin.token') }}: {{ token }}</p>
     </article>
