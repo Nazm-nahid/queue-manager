@@ -48,7 +48,7 @@ async function handleSignIn() {
     <header class="app-header">
       <div class="header-top">
         <router-link to="/" class="brand-link">
-          <img src="/logo.png" alt="Serial Koto" class="brand-logo" />
+          <img src="/logo.png" alt="Serial Nin" class="brand-logo" />
           <span>{{ t('app.brandName') }}</span>
         </router-link>
         <div class="header-actions">

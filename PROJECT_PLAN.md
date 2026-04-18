@@ -243,7 +243,7 @@ Optional scheduled maintenance at 00:05 local timezone:
   - title, description, canonical URL, Open Graph tags
 - Include target keywords naturally:
   - `teler serial`
-  - `serial koto`
+  - `serial nin`
   - `petrol pump serial`
   - `fuel queue Bangladesh`
   - `তেলের সিরিয়াল`
@@ -259,7 +259,7 @@ Optional scheduled maintenance at 00:05 local timezone:
 ## 12. Suggested Folder Structure
 
 ```txt
-serial-koto/
+serial-nin/
   src/
     assets/
     components/

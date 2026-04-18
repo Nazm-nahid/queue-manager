@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { translations, type Locale, type TranslationKey } from './translations';
 
-const STORAGE_KEY = 'serial-koto-locale';
+const STORAGE_KEY = 'serial-nin-locale';
 
 function isLocale(value: string | null): value is Locale {
   return value === 'bn' || value === 'en';

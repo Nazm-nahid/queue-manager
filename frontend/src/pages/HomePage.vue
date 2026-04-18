@@ -35,7 +35,7 @@ const hasPumpLoadError = ref(false);
 
 let hasLoadedPumpListOnce = false;
 const bookingStorageKey = computed(() =>
-  currentUser.value ? `serial-koto:bookings:${currentUser.value.uid}` : 'serial-koto:bookings:guest',
+  currentUser.value ? `serial-nin:bookings:${currentUser.value.uid}` : 'serial-nin:bookings:guest',
 );
 
 function loadStoredBookings() {

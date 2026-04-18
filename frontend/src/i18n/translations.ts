@@ -1,11 +1,11 @@
 export const translations = {
   bn: {
-    'titles.home': 'সিরিয়াল কত | পেট্রোল পাম্প সিরিয়াল',
-    'titles.pumpDetail': 'পাম্প বিস্তারিত | সিরিয়াল কত',
-    'titles.checkin': 'QR চেক-ইন | সিরিয়াল কত',
-    'titles.auth': 'লগইন | সিরিয়াল কত',
+    'titles.home': 'সিরিয়াল নিন | পেট্রোল পাম্প সিরিয়াল',
+    'titles.pumpDetail': 'পাম্প বিস্তারিত | সিরিয়াল নিন',
+    'titles.checkin': 'QR চেক-ইন | সিরিয়াল নিন',
+    'titles.auth': 'লগইন | সিরিয়াল নিন',
 
-    'app.brandName': 'সিরিয়াল কত?',
+    'app.brandName': 'সিরিয়াল নিন',
     'app.brandTag': 'বাংলাদেশে পেট্রোল পাম্পের লাইভ সিরিয়াল ট্র্যাকিং',
     'app.langBangla': 'বাংলা',
     'app.langEnglish': 'English',
@@ -30,7 +30,7 @@ export const translations = {
     'auth.checkinTitle': 'QR চেক-ইনের জন্য সাইন ইন করুন',
     'auth.checkinLead': 'চেক-ইন সম্পন্ন করতে ইমেইল অ্যাকাউন্ট দিয়ে সাইন ইন করতে হবে।',
 
-    'home.kicker': 'teler serial | serial koto | তেলের সিরিয়াল',
+    'home.kicker': 'teler serial | serial nin | তেলের সিরিয়াল',
     'home.title': 'এক ট্যাপেই পেট্রোল পাম্প সিরিয়াল বুকিং',
     'home.lead':
       'রিয়েল-টাইমে পাম্পের সিরিয়াল ট্র্যাক করুন, অনলাইনে সিরিয়াল নিন, আর QR চেক-ইন করে তেল নিন',
@@ -123,12 +123,12 @@ export const translations = {
     'ti': 'টি',
   },
   en: {
-    'titles.home': 'Serial Koto | Petrol Pump Serial',
-    'titles.pumpDetail': 'Pump Details | Serial Koto',
-    'titles.checkin': 'QR Check-in | Serial Koto',
-    'titles.auth': 'Sign In | Serial Koto',
+    'titles.home': 'Serial Nin | Petrol Pump Serial',
+    'titles.pumpDetail': 'Pump Details | Serial Nin',
+    'titles.checkin': 'QR Check-in | Serial Nin',
+    'titles.auth': 'Sign In | Serial Nin',
 
-    'app.brandName': 'Serial Koto?',
+    'app.brandName': 'Serial Nin?',
     'app.brandTag': 'Fuel queue Bangladesh',
     'app.langBangla': 'বাংলা',
     'app.langEnglish': 'English',
@@ -153,7 +153,7 @@ export const translations = {
     'auth.checkinTitle': 'Sign in for QR check-in',
     'auth.checkinLead': 'You need an email account to complete check-in.',
 
-    'home.kicker': 'teler serial | serial koto | তেলের সিরিয়াল',
+    'home.kicker': 'teler serial | serial nin | তেলের সিরিয়াল',
     'home.title': 'Petrol pump serial booking in one tap',
     'home.lead':
       'Track fuel queue Bangladesh in real-time, grab your serial remotely, and arrive with QR check-in.',
