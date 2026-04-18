@@ -62,16 +62,31 @@ The app writes check-ins with fields:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     match /pumps/{pumpId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /users/{userId}/serialBookings/{bookingId} {
+      allow read, create, update, delete: if isOwner(userId);
     }
 
     match /checkins/{checkinId} {
-      allow read, write: if request.auth != null;
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
     }
   }
 }
 ```
 
 Use stricter rules before production.
+
+The app now stores each user's serial bookings in Firestore under users/{uid}/serialBookings, so make sure these rules are deployed before testing take-serial.

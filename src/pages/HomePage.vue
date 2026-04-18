@@ -6,6 +6,7 @@ import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
 import { pumps, type FuelType } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
+import { watchUserBookings } from '../services/bookingService';
 import { fetchPumpsFromFirebase, takeSerialFromFirebase } from '../services/pumpService';
 import { useAuth } from '../composables/useAuth';
 
@@ -34,30 +35,13 @@ const isLoadingPumps = ref(true);
 const hasPumpLoadError = ref(false);
 
 let hasLoadedPumpListOnce = false;
-const bookingStorageKey = computed(() =>
-  currentUser.value ? `serial-nin:bookings:${currentUser.value.uid}` : 'serial-nin:bookings:guest',
-);
+let stopWatchingBookings: (() => void) | null = null;
 
-function loadStoredBookings() {
-  if (!currentUser.value) {
-    bookedSerials.value = [];
-    return;
+function stopBookingListener() {
+  if (stopWatchingBookings) {
+    stopWatchingBookings();
+    stopWatchingBookings = null;
   }
-
-  try {
-    const raw = localStorage.getItem(bookingStorageKey.value);
-    bookedSerials.value = raw ? (JSON.parse(raw) as SerialBooking[]) : [];
-  } catch {
-    bookedSerials.value = [];
-  }
-}
-
-function persistBookings() {
-  if (!currentUser.value) {
-    return;
-  }
-
-  localStorage.setItem(bookingStorageKey.value, JSON.stringify(bookedSerials.value));
 }
 
 const filteredPumps = computed(() => {
@@ -123,23 +107,21 @@ onMounted(() => {
 watch(
   currentUser,
   () => {
-    loadStoredBookings();
+    stopBookingListener();
+    bookedSerials.value = [];
+
     if (currentUser.value) {
       activeHomeTab.value = 'queue';
+      stopWatchingBookings = watchUserBookings(currentUser.value.uid, (bookings) => {
+        bookedSerials.value = bookings;
+      });
     }
   },
   { immediate: true },
 );
 
-watch(
-  bookedSerials,
-  () => {
-    persistBookings();
-  },
-  { deep: true },
-);
-
 onBeforeUnmount(() => {
+  stopBookingListener();
   window.removeEventListener('offline', handleOffline);
   window.removeEventListener('online', handleOnline);
 });
@@ -174,7 +156,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
   try {
     const result = await takeSerialFromFirebase(payload.pumpId, payload.fuelType);
     const newBooking: SerialBooking = {
-      id: `${payload.pumpId}-${payload.fuelType}-${result.serial}-${Date.now()}`,
+      id: result.bookingId,
       pumpId: payload.pumpId,
       serial: result.serial,
       fuelType: payload.fuelType,
@@ -185,7 +167,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       etaMinutes: result.etaMinutes,
     };
 
-    bookedSerials.value = [newBooking, ...bookedSerials.value];
+    bookedSerials.value = [newBooking, ...bookedSerials.value.filter((booking) => booking.id !== newBooking.id)];
     toast.success(
       t('toast.takeSerialSuccess', {
         serial: result.serial,
@@ -211,39 +193,8 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       return;
     }
 
-    // Fallback path while firebase is not configured.
+    toast.error(t('toast.takeSerialFailed'));
   }
-
-  const fuelQueue = bookingPayload.fuelQueues[payload.fuelType];
-  if (fuelQueue.nextSerial > fuelQueue.dailySerialLimit) {
-    toast.error(t('buttons.serialLimitReached'));
-    return;
-  }
-
-  const serial = fuelQueue.nextSerial;
-  const gap = Math.max(serial - fuelQueue.runningSerial, 0);
-  const newBooking: SerialBooking = {
-    id: `${payload.pumpId}-${payload.fuelType}-${serial}-${Date.now()}`,
-    pumpId: payload.pumpId,
-    serial,
-    fuelType: payload.fuelType,
-    pumpName: bookingPayload.name,
-    pumpLocation: bookingPayload.address,
-    runningSerial: fuelQueue.runningSerial,
-    remainingSlots: fuelQueue.dailySerialLimit - fuelQueue.nextSerial,
-    etaMinutes: gap * fuelQueue.serviceMinutesPerVehicle,
-  };
-
-  bookedSerials.value = [newBooking, ...bookedSerials.value];
-  fuelQueue.nextSerial += 1;
-  persistBookings();
-  toast.success(
-    t('toast.takeSerialSuccess', {
-      serial,
-      fuel: t(`fuelTypes.${payload.fuelType}`),
-      pump: bookingPayload.name,
-    }),
-  );
 }
 </script>
 

@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  serverTimestamp,
   runTransaction,
   type DocumentData,
 } from 'firebase/firestore';
@@ -11,6 +12,7 @@ import { useAuth } from '../composables/useAuth';
 import type { FuelType, Pump } from '../data/mockPumps';
 
 export type TakeSerialResult = {
+  bookingId: string;
   serial: number;
   runningSerial: number;
   remainingSlots: number;
@@ -63,6 +65,7 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
   if (!currentUser.value) {
     throw new Error('AUTH_REQUIRED');
   }
+  const userId = currentUser.value.uid;
 
   const pumpRef = doc(db!, 'pumps', pumpId);
 
@@ -89,9 +92,25 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
       [`fuelQueues.${fuelType}.nextSerial`]: serial + 1,
     });
 
+    const bookingRef = doc(collection(db!, 'users', userId, 'serialBookings'));
+    transaction.set(bookingRef, {
+      id: bookingRef.id,
+      pumpId,
+      serial,
+      fuelType,
+      pumpName: pump.name,
+      pumpLocation: pump.address,
+      runningSerial: fuelQueue.runningSerial,
+      remainingSlots: Math.max(fuelQueue.dailySerialLimit - serial, 0),
+      etaMinutes: Math.max(serial - fuelQueue.runningSerial, 0) * fuelQueue.serviceMinutesPerVehicle,
+      createdAt: serverTimestamp(),
+      userId,
+    });
+
     const queueGap = Math.max(serial - fuelQueue.runningSerial, 0);
 
     return {
+      bookingId: bookingRef.id,
       serial,
       runningSerial: fuelQueue.runningSerial,
       remainingSlots: Math.max(fuelQueue.dailySerialLimit - serial, 0),
