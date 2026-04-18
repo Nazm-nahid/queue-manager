@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:firestore": "node scripts/seedFirestore.mjs"
   },
   "dependencies": {
     "@zxing/browser": "^0.1.5",
