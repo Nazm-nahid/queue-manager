@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { pumps, type Pump } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 import { saveCheckinToFirebase } from '../services/checkinService';
 import { fetchPumpByIdFromFirebase } from '../services/pumpService';
+import { useAuth } from '../composables/useAuth';
 
 const route = useRoute();
+const router = useRouter();
 const hasCheckedIn = ref(false);
 const token = computed(() => String(route.query.token || 'demo-token'));
 const pump = ref<Pump | null>(null);
 const isLoadingPump = ref(true);
 const { t } = useI18n();
 const toast = useToast();
+const { currentUser } = useAuth();
 
 async function loadPump() {
   isLoadingPump.value = true;
@@ -32,6 +35,11 @@ async function loadPump() {
 
 async function confirmCheckin() {
   if (!pump.value) {
+    return;
+  }
+
+  if (!currentUser.value) {
+    await router.push({ name: 'auth', query: { redirect: route.fullPath } });
     return;
   }
 
@@ -63,6 +71,14 @@ onMounted(() => {
       <p class="tiny">{{ t('checkin.token') }}: {{ token }}</p>
     </article>
 
+    <article v-if="!currentUser" class="panel auth-required-panel">
+      <h2>{{ t('auth.checkinTitle') }}</h2>
+      <p class="hint-text">{{ t('auth.checkinLead') }}</p>
+      <router-link :to="{ name: 'auth', query: { redirect: route.fullPath } }" class="solid-button centered">
+        {{ t('auth.signIn') }}
+      </router-link>
+    </article>
+
     <article class="panel">
       <h2>{{ t('checkin.howWorks') }}</h2>
       <ul class="list">
@@ -71,7 +87,7 @@ onMounted(() => {
         <li>{{ t('checkin.step3') }}</li>
       </ul>
 
-      <button class="solid-button full" @click="confirmCheckin" :disabled="hasCheckedIn">
+      <button class="solid-button full" @click="confirmCheckin" :disabled="hasCheckedIn || !currentUser">
         {{ hasCheckedIn ? t('checkin.confirmed') : t('checkin.confirmArrival') }}
       </button>
     </article>

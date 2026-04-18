@@ -56,6 +56,14 @@ a {
   gap: 0.7rem;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .brand-link {
   display: inline-flex;
   align-items: center;
@@ -101,6 +109,11 @@ a {
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.header-auth-button {
+  padding: 0.55rem 0.8rem;
+  font-size: 0.86rem;
 }
 
 .app-content {
@@ -287,6 +300,79 @@ h2 {
 .solid-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.auth-shell {
+  display: grid;
+  place-items: center;
+  min-height: 52vh;
+}
+
+.auth-card {
+  width: min(100%, 560px);
+}
+
+.auth-lead {
+  color: var(--muted);
+}
+
+.auth-toggle {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.auth-toggle-button {
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  background: #f4f8f2;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-toggle-button.active {
+  background: var(--brand);
+  color: #f4fff9;
+  border-color: var(--brand);
+}
+
+.auth-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.auth-input {
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 0.85rem 0.9rem;
+  font: inherit;
+  background: #fff;
+  color: var(--ink);
+}
+
+.auth-error {
+  color: #a32626;
+  font-size: 0.92rem;
+}
+
+.auth-note {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .full {

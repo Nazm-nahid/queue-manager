@@ -9,6 +9,11 @@
 - In Firebase console, open Firestore Database.
 - Create database in production or test mode.
 
+## 2.5) Enable Google authentication
+- In Firebase console, open Authentication.
+- Enable the Google provider.
+- Add your support email if prompted.
+
 ## 3) Create `pumps` collection
 Use document id as `pump-001`, `pump-002`, etc.
 
@@ -58,11 +63,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /pumps/{pumpId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
     match /checkins/{checkinId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
   }
 }

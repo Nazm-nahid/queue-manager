@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import PumpCard from '../components/PumpCard.vue';
 import PumpSearchBar from '../components/PumpSearchBar.vue';
 import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
@@ -7,6 +8,7 @@ import { pumps, type FuelType } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 import { fetchPumpsFromFirebase, takeSerialFromFirebase } from '../services/pumpService';
+import { useAuth } from '../composables/useAuth';
 
 type SerialBooking = {
   id: string;
@@ -24,6 +26,8 @@ type SerialBooking = {
 const query = ref('');
 const { t } = useI18n();
 const toast = useToast();
+const router = useRouter();
+const { currentUser } = useAuth();
 const activeHomeTab = ref<'queue' | 'search'>('queue');
 
 const bookedSerials = ref<SerialBooking[]>([]);
@@ -32,6 +36,31 @@ const isLoadingPumps = ref(true);
 const hasPumpLoadError = ref(false);
 
 let hasLoadedPumpListOnce = false;
+const bookingStorageKey = computed(() =>
+  currentUser.value ? `serial-koto:bookings:${currentUser.value.uid}` : 'serial-koto:bookings:guest',
+);
+
+function loadStoredBookings() {
+  if (!currentUser.value) {
+    bookedSerials.value = [];
+    return;
+  }
+
+  try {
+    const raw = localStorage.getItem(bookingStorageKey.value);
+    bookedSerials.value = raw ? (JSON.parse(raw) as SerialBooking[]) : [];
+  } catch {
+    bookedSerials.value = [];
+  }
+}
+
+function persistBookings() {
+  if (!currentUser.value) {
+    return;
+  }
+
+  localStorage.setItem(bookingStorageKey.value, JSON.stringify(bookedSerials.value));
+}
 
 const filteredPumps = computed(() => {
   const term = query.value.toLowerCase().trim();
@@ -65,7 +94,6 @@ async function loadPumps() {
     availablePumps.value = firebasePumps.length > 0 ? firebasePumps : pumps;
     if (!hasLoadedPumpListOnce) {
       hasLoadedPumpListOnce = true;
-      
     }
   } catch {
     // Keep app usable with local seed data if backend is unavailable.
@@ -94,12 +122,37 @@ onMounted(() => {
   window.addEventListener('online', handleOnline);
 });
 
+watch(
+  currentUser,
+  () => {
+    loadStoredBookings();
+    if (currentUser.value) {
+      activeHomeTab.value = 'queue';
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  bookedSerials,
+  () => {
+    persistBookings();
+  },
+  { deep: true },
+);
+
 onBeforeUnmount(() => {
   window.removeEventListener('offline', handleOffline);
   window.removeEventListener('online', handleOnline);
 });
 
 async function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
+  if (!currentUser.value) {
+    toast.info(t('auth.signInToTakeSerial'));
+    await router.push({ name: 'auth', query: { redirect: '/' } });
+    return;
+  }
+
   if (!navigator.onLine) {
     toast.error(t('toast.takeSerialFailed'));
     return;
@@ -146,6 +199,12 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       return;
     }
 
+    if (error instanceof Error && error.message === 'AUTH_REQUIRED') {
+      toast.info(t('auth.signInToTakeSerial'));
+      await router.push({ name: 'auth', query: { redirect: '/' } });
+      return;
+    }
+
     // Fallback path while firebase is not configured.
   }
 
@@ -171,6 +230,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
 
   bookedSerials.value = [newBooking, ...bookedSerials.value];
   fuelQueue.nextSerial += 1;
+  persistBookings();
   toast.success(
     t('toast.takeSerialSuccess', {
       serial,
@@ -212,10 +272,15 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
   </section>
 
   <section v-if="activeHomeTab === 'queue'" class="stack">
-    <QueueSnapshotCard v-if="bookedSerials.length > 0" :bookings="bookedSerials" />
+    <QueueSnapshotCard v-if="currentUser && bookedSerials.length > 0" :bookings="bookedSerials" />
     <article v-else class="panel">
-      <h2>{{ t('home.emptyQueueTitle') }}</h2>
-      <p class="hint-text">{{ t('home.emptyQueueLead') }}</p>
+      <h2>{{ currentUser ? t('home.emptyQueueTitle') : t('auth.queueTitle') }}</h2>
+      <p class="hint-text">
+        {{ currentUser ? t('home.emptyQueueLead') : t('auth.queueLead') }}
+      </p>
+      <router-link v-if="!currentUser" to="/auth" class="solid-button centered">
+        {{ t('auth.signIn') }}
+      </router-link>
     </article>
   </section>
 
@@ -232,7 +297,13 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
     </article>
 
     <div v-else class="card-list">
-      <PumpCard v-for="pump in filteredPumps" :key="pump.id" :pump="pump" @take-serial="handleTakeSerial" />
+      <PumpCard
+        v-for="pump in filteredPumps"
+        :key="pump.id"
+        :pump="pump"
+        :requires-auth="!currentUser"
+        @take-serial="handleTakeSerial"
+      />
     </div>
   </section>
 </template>

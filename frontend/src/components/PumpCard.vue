@@ -4,7 +4,7 @@ import type { FuelType, Pump } from '../data/mockPumps';
 import { useI18n } from '../i18n';
 import FuelTypeModal from './FuelTypeModal.vue';
 
-const props = defineProps<{ pump: Pump }>();
+const props = defineProps<{ pump: Pump; requiresAuth?: boolean }>();
 const emit = defineEmits<{
   'take-serial': [{ serial: number; fuelType: string; pumpId: string }];
 }>();
@@ -95,7 +95,9 @@ function handleFuelSelect(fuelType: string) {
         <a :href="pump.googleMapLink" target="_blank" rel="noopener noreferrer" class="ghost-button">
           {{ t('pump.viewMaps') }}
         </a>
-        <button @click="handleSerial" class="solid-button">{{ t('buttons.takeSerial') }}</button>
+        <button @click="handleSerial" class="solid-button">
+          {{ t('buttons.takeSerial') }}
+        </button>
       </div>
     </div>
 

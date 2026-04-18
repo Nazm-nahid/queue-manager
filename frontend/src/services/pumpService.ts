@@ -7,6 +7,7 @@ import {
   type DocumentData,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../lib/firebase';
+import { useAuth } from '../composables/useAuth';
 import type { FuelType, Pump } from '../data/mockPumps';
 
 export type TakeSerialResult = {
@@ -57,6 +58,11 @@ export async function fetchPumpByIdFromFirebase(pumpId: string): Promise<Pump | 
 
 export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType): Promise<TakeSerialResult> {
   assertDbReady();
+
+  const { currentUser } = useAuth();
+  if (!currentUser.value) {
+    throw new Error('AUTH_REQUIRED');
+  }
 
   const pumpRef = doc(db!, 'pumps', pumpId);
 
