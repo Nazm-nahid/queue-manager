@@ -7,6 +7,7 @@ import { pumps, type FuelType } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 import { useAuthModal } from '../composables/useAuthModal';
+import type { BookingStatus } from '../services/bookingService';
 import { watchUserBookings } from '../services/bookingService';
 import { fetchPumpsFromFirebase, takeSerialFromFirebase } from '../services/pumpService';
 import { useAuth } from '../composables/useAuth';
@@ -15,6 +16,7 @@ type SerialBooking = {
   id: string;
   pumpId: string;
   createdAtMs: number;
+  status: BookingStatus;
   serial: number;
   fuelType: FuelType;
   pumpName: string;
@@ -162,6 +164,7 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       id: result.bookingId,
       pumpId: payload.pumpId,
       createdAtMs: result.createdAtMs,
+      status: 'pending',
       serial: result.serial,
       fuelType: payload.fuelType,
       pumpName: result.pumpName,

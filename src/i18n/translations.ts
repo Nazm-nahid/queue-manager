@@ -67,6 +67,8 @@ export const translations = {
     'snapshot.estimatedWait': 'আরো অপেক্ষা করতে হবে',
     'snapshot.minutes': 'মিনিট',
     'snapshot.selectedFuel': 'নির্বাচিত জ্বালানি',
+    'snapshot.attend': 'attend',
+    'snapshot.skipped': 'skipped',
 
     'pumpDetail.kicker': 'petrol pump serial',
     'pumpDetail.dailyLimit': 'দৈনিক সীমা',
@@ -194,6 +196,8 @@ export const translations = {
     'snapshot.estimatedWait': 'Estimated wait',
     'snapshot.minutes': 'minute',
     'snapshot.selectedFuel': 'Selected fuel',
+    'snapshot.attend': 'attend',
+    'snapshot.skipped': 'skipped',
 
     'pumpDetail.kicker': 'petrol pump serial',
     'pumpDetail.dailyLimit': 'Daily limit',

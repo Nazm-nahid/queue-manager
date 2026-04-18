@@ -1,8 +1,9 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../lib/firebase';
 import { useAuth } from '../composables/useAuth';
+import { markBookingAttend } from './bookingService';
 
-export async function saveCheckinToFirebase(pumpId: string, token: string) {
+export async function saveCheckinToFirebase(pumpId: string, token: string, bookingId?: string) {
   if (!isFirebaseConfigured || !db) {
     throw new Error('FIREBASE_NOT_CONFIGURED');
   }
@@ -17,4 +18,8 @@ export async function saveCheckinToFirebase(pumpId: string, token: string) {
     token,
     checkedInAt: serverTimestamp(),
   });
+
+  if (bookingId) {
+    await markBookingAttend(currentUser.value.uid, bookingId);
+  }
 }

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuth } from '../composables/useAuth';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
+import { markBookingSkipped } from '../services/bookingService';
 import QrScannerModal from './QrScannerModal.vue';
 
 const props = defineProps<{
@@ -10,6 +12,7 @@ const props = defineProps<{
     id: string;
     pumpId: string;
     createdAtMs: number;
+    status: 'pending' | 'attend' | 'skipped';
     serial: number;
     runningSerial: number;
     remainingSlots: number;
@@ -22,9 +25,11 @@ const props = defineProps<{
 
 const scannerBooking = ref<(typeof props.bookings)[number] | null>(null);
 const nowMs = ref(Date.now());
+const skipMarkingInFlight = ref<Record<string, boolean>>({});
 const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
+const { currentUser } = useAuth();
 let countdownTimerId: number | null = null;
 
 function fuelLabel(fuelType?: string | null) {
@@ -79,8 +84,78 @@ function remainingEtaSeconds(booking: (typeof props.bookings)[number]) {
   return Math.max(totalSeconds - elapsedSeconds, 0);
 }
 
+function skipDeadlineMs(booking: (typeof props.bookings)[number]) {
+  return booking.createdAtMs + booking.etaMinutes * 60_000 + 30 * 60_000;
+}
+
+function isSkipOverdue(booking: (typeof props.bookings)[number]) {
+  return nowMs.value > skipDeadlineMs(booking);
+}
+
+function bookingStatusLabel(booking: (typeof props.bookings)[number]) {
+  if (booking.status === 'attend') {
+    return t('snapshot.attend');
+  }
+
+  if (booking.status === 'skipped' || isSkipOverdue(booking)) {
+    return t('snapshot.skipped');
+  }
+
+  return '';
+}
+
+function bookingStatusClass(booking: (typeof props.bookings)[number]) {
+  if (booking.status === 'attend') {
+    return 'attend';
+  }
+
+  if (booking.status === 'skipped' || isSkipOverdue(booking)) {
+    return 'skipped';
+  }
+
+  return '';
+}
+
+async function ensureSkippedWhenOverdue() {
+  const uid = currentUser.value?.uid;
+  if (!uid) {
+    return;
+  }
+
+  for (const booking of props.bookings) {
+    if (booking.status === 'attend' || booking.status === 'skipped' || !isSkipOverdue(booking)) {
+      continue;
+    }
+
+    if (skipMarkingInFlight.value[booking.id]) {
+      continue;
+    }
+
+    skipMarkingInFlight.value[booking.id] = true;
+    try {
+      await markBookingSkipped(uid, booking.id);
+    } catch {
+      // Silent retry on the next timer tick.
+    } finally {
+      skipMarkingInFlight.value[booking.id] = false;
+    }
+  }
+}
+
 onMounted(startCountdown);
 onBeforeUnmount(stopCountdown);
+
+watch(nowMs, () => {
+  void ensureSkippedWhenOverdue();
+});
+
+watch(
+  () => props.bookings,
+  () => {
+    void ensureSkippedWhenOverdue();
+  },
+  { immediate: true },
+);
 
 async function handleQrScan(scannedValue: string) {
   if (!scannerBooking.value) {
@@ -96,7 +171,7 @@ async function handleQrScan(scannedValue: string) {
   try {
     await router.push({
       path: `/checkin/${scannerBooking.value.pumpId}`,
-      query: { token: scannedValue },
+      query: { token: scannedValue, bookingId: scannerBooking.value.id },
     });
     toast.success(t('toast.qrScanSuccess'));
   } catch {
@@ -144,6 +219,9 @@ async function handleQrScan(scannedValue: string) {
             <p class="tiny snapshot-simple-fuel">
             {{ fuelLabel(booking.fuelType) }}
           </p>
+            <p v-if="bookingStatusLabel(booking)" class="tiny snapshot-status-chip" :class="bookingStatusClass(booking)">
+              {{ bookingStatusLabel(booking) }}
+            </p>
           </div>
 
         </div>
@@ -240,6 +318,24 @@ async function handleQrScan(scannedValue: string) {
 .snapshot-simple-fuel {
   color: var(--accent);
   text-align: center;
+}
+
+.snapshot-status-chip {
+  margin-top: 0.25rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.snapshot-status-chip.attend {
+  background: #e9f2e4;
+  color: #325a1f;
+}
+
+.snapshot-status-chip.skipped {
+  background: #fae7e7;
+  color: #8b2323;
 }
 
 .w-full {

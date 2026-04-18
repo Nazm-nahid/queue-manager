@@ -12,6 +12,10 @@ import { useAuthModal } from '../composables/useAuthModal';
 const route = useRoute();
 const hasCheckedIn = ref(false);
 const token = computed(() => String(route.query.token || 'demo-token'));
+const bookingId = computed(() => {
+  const value = route.query.bookingId;
+  return typeof value === 'string' && value.trim() ? value : null;
+});
 const pump = ref<Pump | null>(null);
 const isLoadingPump = ref(true);
 const { t } = useI18n();
@@ -52,7 +56,7 @@ async function confirmCheckin() {
   }
 
   try {
-    await saveCheckinToFirebase(pump.value.id, token.value);
+    await saveCheckinToFirebase(pump.value.id, token.value, bookingId.value ?? undefined);
   } catch {
     // Keep local success for demo mode when firebase is not configured.
   }

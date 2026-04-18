@@ -100,6 +100,7 @@ export async function takeSerialFromFirebase(pumpId: string, fuelType: FuelType)
       pumpId,
       serial,
       fuelType,
+      status: 'pending',
       pumpName: pump.name,
       pumpLocation: pump.address,
       runningSerial: fuelQueue.runningSerial,
