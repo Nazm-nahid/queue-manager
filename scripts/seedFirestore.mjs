@@ -55,6 +55,7 @@ const pumps = [
     googleMapLink: 'https://maps.google.com/?q=Road+27+Dhanmondi+Dhaka',
     imageUrl:
       'https://images.unsplash.com/photo-1563078840-6e1f1f5f0d84?auto=format&fit=crop&w=900&q=80',
+    qrSecretHash: '8f7d4a1c',
     fuelQueues: {
       petrol: {
         dailySerialLimit: 100,
@@ -84,6 +85,7 @@ const pumps = [
     googleMapLink: 'https://maps.google.com/?q=Mirpur+10+Dhaka',
     imageUrl:
       'https://images.unsplash.com/photo-1631021725237-1450fda84f07?auto=format&fit=crop&w=900&q=80',
+    qrSecretHash: '5be8122f',
     fuelQueues: {
       petrol: {
         dailySerialLimit: 120,
@@ -113,6 +115,7 @@ const pumps = [
     googleMapLink: 'https://maps.google.com/?q=Agrabad+Chattogram',
     imageUrl:
       'https://images.unsplash.com/photo-1621983363691-b1620f859d48?auto=format&fit=crop&w=900&q=80',
+    qrSecretHash: '9a23d66b',
     fuelQueues: {
       petrol: {
         dailySerialLimit: 90,

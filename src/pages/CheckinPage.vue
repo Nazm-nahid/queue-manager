@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { pumps, type Pump } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
@@ -10,7 +10,12 @@ import { useAuth } from '../composables/useAuth';
 import { useAuthModal } from '../composables/useAuthModal';
 
 const route = useRoute();
+const router = useRouter();
 const hasCheckedIn = ref(false);
+const showAttendanceModal = ref(false);
+const isSubmittingCheckin = ref(false);
+const hasTriggeredAutoCheckin = ref(false);
+const hasInvalidToken = ref(false);
 const token = computed(() => String(route.query.token || 'demo-token'));
 const bookingId = computed(() => {
   const value = route.query.bookingId;
@@ -22,6 +27,60 @@ const { t } = useI18n();
 const toast = useToast();
 const { currentUser } = useAuth();
 const { openAuthModal } = useAuthModal();
+
+function parseQrToken(rawToken: string) {
+  const trimmed = rawToken.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(trimmed) as {
+        pump_id?: string | number;
+        secret?: string;
+      };
+
+      const rawPumpId = parsed.pump_id;
+      const hash = parsed.secret;
+      if (rawPumpId === undefined || !hash) {
+        return null;
+      }
+
+      return { pumpId: String(rawPumpId), hash };
+    } catch {
+      return null;
+    }
+  }
+}
+
+function resolveCandidatePumpIds(rawPumpId: string) {
+  const normalized = rawPumpId.trim();
+  if (!normalized) {
+    return [];
+  }
+
+  if (/^\d+$/.test(normalized)) {
+    const padded = normalized.padStart(3, '0');
+    return [normalized, `pump-${padded}`];
+  }
+
+  return [normalized];
+}
+
+function isValidQrToken() {
+  if (!pump.value) {
+    return false;
+  }
+
+  const parsedToken = parseQrToken(token.value);
+  if (!parsedToken) {
+    return false;
+  }
+
+  const candidatePumpIds = resolveCandidatePumpIds(parsedToken.pumpId);
+  return candidatePumpIds.includes(pump.value.id) && parsedToken.hash === pump.value.qrSecretHash;
+}
 
 async function handleSignIn() {
   const signedIn = await openAuthModal();
@@ -36,8 +95,16 @@ async function loadPump() {
 
   try {
     const backendPump = await fetchPumpByIdFromFirebase(pumpId);
+    const localPumpFallback = pumps.find((item) => item.id === pumpId) || null;
     // If a specific Firestore pump document is missing, keep check-in usable with local seed data.
-    pump.value = backendPump || pumps.find((item) => item.id === pumpId) || null;
+    if (backendPump && localPumpFallback) {
+      pump.value = {
+        ...backendPump,
+        qrSecretHash: (backendPump as Partial<Pump>).qrSecretHash || localPumpFallback.qrSecretHash,
+      };
+    } else {
+      pump.value = backendPump || localPumpFallback;
+    }
   } catch {
     pump.value = pumps.find((item) => item.id === pumpId) || null;
   } finally {
@@ -46,7 +113,7 @@ async function loadPump() {
 }
 
 async function confirmCheckin() {
-  if (!pump.value) {
+  if (!pump.value || hasCheckedIn.value || isSubmittingCheckin.value) {
     return;
   }
 
@@ -55,19 +122,47 @@ async function confirmCheckin() {
     return;
   }
 
+  if (!isValidQrToken()) {
+    hasInvalidToken.value = true;
+    toast.error(t('checkin.invalidLead'));
+    return;
+  }
+
+  isSubmittingCheckin.value = true;
+
   try {
     await saveCheckinToFirebase(pump.value.id, token.value, bookingId.value ?? undefined);
   } catch {
     // Keep local success for demo mode when firebase is not configured.
+  } finally {
+    isSubmittingCheckin.value = false;
   }
 
   hasCheckedIn.value = true;
-  toast.success(t('checkin.confirmed'));
+  showAttendanceModal.value = true;
+}
+
+async function closeAttendanceModal() {
+  showAttendanceModal.value = false;
+  await router.replace('/');
 }
 
 onMounted(() => {
   void loadPump();
 });
+
+watch(
+  [() => pump.value, () => currentUser.value],
+  () => {
+    if (!pump.value || !currentUser.value || hasTriggeredAutoCheckin.value) {
+      return;
+    }
+
+    hasTriggeredAutoCheckin.value = true;
+    void confirmCheckin();
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -75,12 +170,11 @@ onMounted(() => {
     <p class="hint-text">{{ t('home.loadingPumps') }}</p>
   </section>
 
-  <section v-else-if="pump" class="stack">
+  <section v-else-if="pump && !hasInvalidToken" class="stack">
     <article class="panel">
       <p class="kicker">{{ t('checkin.kicker') }}</p>
       <h1>{{ pump?.name }}</h1>
       <p class="lead">{{ t('checkin.lead') }}</p>
-      <p class="tiny">{{ t('checkin.token') }}: {{ token }}</p>
     </article>
 
     <article v-if="!currentUser" class="panel auth-required-panel">
@@ -99,12 +193,10 @@ onMounted(() => {
         <li>{{ t('checkin.step3') }}</li>
       </ul>
 
-      <button class="solid-button full" @click="confirmCheckin" :disabled="hasCheckedIn || !currentUser">
+      <button class="solid-button full" @click="confirmCheckin" :disabled="hasCheckedIn || !currentUser || isSubmittingCheckin">
         {{ hasCheckedIn ? t('checkin.confirmed') : t('checkin.confirmArrival') }}
       </button>
     </article>
-
-    <p v-if="hasCheckedIn" class="success-text">{{ t('checkin.success') }}</p>
   </section>
 
   <section v-else class="panel">
@@ -112,4 +204,32 @@ onMounted(() => {
     <p class="lead">{{ t('checkin.invalidLead') }}</p>
     <router-link to="/" class="solid-button">{{ t('common.backToHome') }}</router-link>
   </section>
+
+  <teleport to="body">
+    <div v-if="showAttendanceModal" class="attendance-overlay" @click.self="closeAttendanceModal">
+      <article class="panel attendance-modal" role="dialog" aria-modal="true" :aria-label="t('checkin.attendanceRecordedTitle')">
+        <h2>{{ t('checkin.attendanceRecordedTitle') }}</h2>
+        <p class="lead">{{ t('checkin.attendanceRecordedLead') }}</p>
+        <button type="button" class="solid-button full" @click="closeAttendanceModal">
+          {{ t('checkin.backToQueue') }}
+        </button>
+      </article>
+    </div>
+  </teleport>
 </template>
+
+<style scoped>
+.attendance-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 27, 20, 0.58);
+  z-index: 70;
+  padding: 1rem;
+}
+
+.attendance-modal {
+  width: min(92vw, 420px);
+}
+</style>

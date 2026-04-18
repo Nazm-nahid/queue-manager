@@ -36,6 +36,7 @@ function toPump(docId: string, data: DocumentData): Pump {
     address: String(data.address || ''),
     googleMapLink: String(data.googleMapLink || ''),
     imageUrl: String(data.imageUrl || ''),
+    qrSecretHash: String(data.qrSecretHash || ''),
     fuelQueues: data.fuelQueues,
   } as Pump;
 }

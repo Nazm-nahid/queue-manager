@@ -110,6 +110,9 @@ export const translations = {
     'checkin.confirmArrival': 'উপস্থিতি নিশ্চিত করুন',
     'checkin.confirmed': 'চেক-ইন সম্পন্ন',
     'checkin.success': 'আপনার স্ট্যাটাস active হয়েছে। সিরিয়াল ডাকলে সার্ভিস লেনে যান।',
+    'checkin.attendanceRecordedTitle': 'উপস্থিতি সফলভাবে রেকর্ড হয়েছে',
+    'checkin.attendanceRecordedLead': 'আপনার উপস্থিতি নেওয়া হয়েছে। এখন কিউ স্ট্যাটাস পেজে ফিরে যেতে পারেন।',
+    'checkin.backToQueue': 'কিউ স্ট্যাটাসে ফিরুন',
     'checkin.invalidTitle': 'অকার্যকর QR',
     'checkin.invalidLead': 'এই QR কোডের সাথে কোনও রেজিস্টার্ড পাম্প মেলেনি।',
 
@@ -239,6 +242,9 @@ export const translations = {
     'checkin.confirmArrival': 'Confirm Arrival',
     'checkin.confirmed': 'Check-in Confirmed',
     'checkin.success': 'Your status is now active. Proceed to the service lane when your serial is called.',
+    'checkin.attendanceRecordedTitle': 'Attendance Recorded Successfully',
+    'checkin.attendanceRecordedLead': 'Your attendance has been recorded. You can now return to the queue status page.',
+    'checkin.backToQueue': 'Back to Queue Status',
     'checkin.invalidTitle': 'Invalid QR',
     'checkin.invalidLead': 'We could not match this QR code to any registered pump.',
 
