@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import PumpCard from '../components/PumpCard.vue';
 import PumpSearchBar from '../components/PumpSearchBar.vue';
 import QueueSnapshotCard from '../components/QueueSnapshotCard.vue';
@@ -26,8 +25,7 @@ type SerialBooking = {
 const query = ref('');
 const { t } = useI18n();
 const toast = useToast();
-const router = useRouter();
-const { currentUser } = useAuth();
+const { currentUser, signInWithGoogle } = useAuth();
 const activeHomeTab = ref<'queue' | 'search'>('queue');
 
 const bookedSerials = ref<SerialBooking[]>([]);
@@ -148,9 +146,13 @@ onBeforeUnmount(() => {
 
 async function handleTakeSerial(payload: { serial: number; fuelType: string; pumpId: string }) {
   if (!currentUser.value) {
-    toast.info(t('auth.signInToTakeSerial'));
-    await router.push({ name: 'auth', query: { redirect: '/' } });
-    return;
+    try {
+      await signInWithGoogle();
+      toast.success(t('auth.signInSuccess'));
+    } catch {
+      toast.info(t('auth.signInToTakeSerial'));
+      return;
+    }
   }
 
   if (!navigator.onLine) {
@@ -200,8 +202,12 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
     }
 
     if (error instanceof Error && error.message === 'AUTH_REQUIRED') {
-      toast.info(t('auth.signInToTakeSerial'));
-      await router.push({ name: 'auth', query: { redirect: '/' } });
+      try {
+        await signInWithGoogle();
+        toast.success(t('auth.signInSuccess'));
+      } catch {
+        toast.info(t('auth.signInToTakeSerial'));
+      }
       return;
     }
 
@@ -278,9 +284,9 @@ async function handleTakeSerial(payload: { serial: number; fuelType: string; pum
       <p class="hint-text">
         {{ currentUser ? t('home.emptyQueueLead') : t('auth.queueLead') }}
       </p>
-      <router-link v-if="!currentUser" to="/auth" class="solid-button centered">
+      <button v-if="!currentUser" type="button" class="solid-button centered" @click="signInWithGoogle">
         {{ t('auth.signIn') }}
-      </router-link>
+      </button>
     </article>
   </section>
 

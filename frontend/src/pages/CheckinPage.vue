@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { pumps, type Pump } from '../data/mockPumps';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
@@ -9,14 +9,22 @@ import { fetchPumpByIdFromFirebase } from '../services/pumpService';
 import { useAuth } from '../composables/useAuth';
 
 const route = useRoute();
-const router = useRouter();
 const hasCheckedIn = ref(false);
 const token = computed(() => String(route.query.token || 'demo-token'));
 const pump = ref<Pump | null>(null);
 const isLoadingPump = ref(true);
 const { t } = useI18n();
 const toast = useToast();
-const { currentUser } = useAuth();
+const { currentUser, signInWithGoogle } = useAuth();
+
+async function handleSignIn() {
+  try {
+    await signInWithGoogle();
+    toast.success(t('auth.signInSuccess'));
+  } catch {
+    toast.error(t('auth.genericError'));
+  }
+}
 
 async function loadPump() {
   isLoadingPump.value = true;
@@ -39,7 +47,7 @@ async function confirmCheckin() {
   }
 
   if (!currentUser.value) {
-    await router.push({ name: 'auth', query: { redirect: route.fullPath } });
+    await handleSignIn();
     return;
   }
 
@@ -74,9 +82,9 @@ onMounted(() => {
     <article v-if="!currentUser" class="panel auth-required-panel">
       <h2>{{ t('auth.checkinTitle') }}</h2>
       <p class="hint-text">{{ t('auth.checkinLead') }}</p>
-      <router-link :to="{ name: 'auth', query: { redirect: route.fullPath } }" class="solid-button centered">
+      <button type="button" class="solid-button centered" @click="handleSignIn">
         {{ t('auth.signIn') }}
-      </router-link>
+      </button>
     </article>
 
     <article class="panel">

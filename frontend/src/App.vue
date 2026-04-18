@@ -11,7 +11,7 @@ const route = useRoute();
 const router = useRouter();
 const { locale, t } = useI18n();
 const toast = useToast();
-const { currentUser, signOut } = useAuth();
+const { currentUser, signInWithGoogle, signOut } = useAuth();
 
 watch(
   [() => route.meta.titleKey as TranslationKey | undefined, locale],
@@ -30,6 +30,15 @@ async function handleSignOut() {
     await router.push('/');
   } catch {
     toast.error(t('auth.signOutFailed'));
+  }
+}
+
+async function handleSignIn() {
+  try {
+    await signInWithGoogle();
+    toast.success(t('auth.signInSuccess'));
+  } catch {
+    toast.error(t('auth.genericError'));
   }
 }
 </script>
@@ -62,9 +71,9 @@ async function handleSignOut() {
             </button>
           </div>
 
-          <router-link v-if="!currentUser" to="/auth" class="ghost-button header-auth-button">
+          <button v-if="!currentUser" type="button" class="ghost-button header-auth-button" @click="handleSignIn">
             {{ t('auth.signIn') }}
-          </router-link>
+          </button>
           <button v-else type="button" class="ghost-button header-auth-button" @click="handleSignOut">
             {{ t('auth.signOut') }}
           </button>
